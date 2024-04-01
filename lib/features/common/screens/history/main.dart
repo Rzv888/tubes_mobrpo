@@ -1,6 +1,4 @@
-import "package:flutter/material.dart";
-import "package:flutter_tubes_galon/common/widgets/screen_template.dart";
-import "package:flutter_tubes_galon/utils/constants/sizes.dart";
+import 'package:flutter/material.dart';
 
 class GalonPurchase {
   final String storeLocation;
@@ -26,14 +24,26 @@ class Galon {
   });
 }
 
-class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Galon Purchase History',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: GalonPurchaseHistoryPage(),
+//     );
+//   }
+// }
 
+class GalonPurchaseHistoryPage extends StatefulWidget {
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  _GalonPurchaseHistoryPageState createState() =>
+      _GalonPurchaseHistoryPageState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class _GalonPurchaseHistoryPageState extends State<GalonPurchaseHistoryPage> {
   List<GalonPurchase> _purchases = [
     GalonPurchase(
       storeLocation: 'Kurnia Air',
@@ -52,9 +62,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
       purchaseDate: DateTime(2024, 3, 26, 9, 15),
     ),
   ];
+
   @override
   Widget build(BuildContext context) {
-    return ScreenTemplate(title: "Riwayat", child: ListView.builder(
+    _purchases.sort((a, b) => b.purchaseDate.compareTo(a.purchaseDate));
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Riwayat Pembelian'),
+      ),
+      body: ListView.builder(
         itemCount: _purchases.length,
         itemBuilder: (context, index) {
           return GestureDetector(
@@ -115,9 +132,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           );
         },
-      ));
-      
+      ),
+    );
   }
+
   void _showPurchaseDetailsDialog(
       BuildContext context, GalonPurchase purchase) {
     if (purchase.gallons.isEmpty) {

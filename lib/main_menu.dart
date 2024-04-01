@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tubes_galon/features/common/screens/history/main.dart';
 import 'package:flutter_tubes_galon/features/common/screens/home/home.dart';
 import 'package:flutter_tubes_galon/features/common/screens/chat/chat.dart';
 import 'package:flutter_tubes_galon/features/common/screens/history/history.dart';
@@ -76,6 +77,6 @@ class MainMenuController extends GetxController {
     ChatScreen(),
     SearchScreen(),
     OrderScreen(),
-    HistoryScreen()
+    GalonPurchaseHistoryPage()
   ];
 }

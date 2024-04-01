@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/onboarding/onboarding.dart';
-import 'package:flutter_tubes_galon/features/saldo/screens/saldo.dart';
 import 'package:flutter_tubes_galon/utils/theme/theme.dart';
 import 'package:get/get.dart';
 
