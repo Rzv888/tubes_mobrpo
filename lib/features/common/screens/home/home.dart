@@ -2,11 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tubes_galon/data/list_galon.dart';
+import 'package:flutter_tubes_galon/features/common/controllers/home/AddItemController.dart';
 import 'package:flutter_tubes_galon/features/profile/screens/profile.dart';
 import 'package:flutter_tubes_galon/features/saldo/screens/saldo.dart';
 import 'package:flutter_tubes_galon/theme.dart';
+import 'package:flutter_tubes_galon/utils/constants/colors.dart';
+import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
+import 'package:flutter_tubes_galon/utils/helpers/helper_functions.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppHelperFunctions.isDarkMode(context);
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: ListView(
@@ -124,13 +131,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   "Saldo",
                                   style: GoogleFonts.boogaloo(
                                       fontSize: 15,
-                                      fontWeight: FontWeight.w700),
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.dark),
                                 ),
                                 Text(
                                   "Rp. 5.000",
                                   style: GoogleFonts.boogaloo(
                                       fontSize: 15,
-                                      fontWeight: FontWeight.w700),
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.dark),
                                 )
                               ],
                             )
@@ -212,6 +221,8 @@ class ListItems extends StatefulWidget {
 class _ListItemsState extends State<ListItems> {
   @override
   Widget build(BuildContext context) {
+    final isDark = AppHelperFunctions.isDarkMode(context);
+    final itemController = Get.put(AddItemController());
     return GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -219,61 +230,120 @@ class _ListItemsState extends State<ListItems> {
             crossAxisCount: 3,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            mainAxisExtent: 180),
+            mainAxisExtent: 150),
         itemCount: listGalon.length,
         itemBuilder: (_, index) {
-          return Container(
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: primaryColor, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5), //color of shadow
-                    spreadRadius: 1, //spread radius
-                    blurRadius: 7, // blur radius
-                    offset: Offset(0, 2),
-                  )
-                ]),
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(
-                "${listGalon[index]['nama']}",
-                style: GoogleFonts.boogaloo(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                    color: primaryColor),
-              ),
-              Image.asset(
-                listGalon[index]['image'],
-                width: 100,
-              ),
-              Text(
-                "${listGalon[index]['harga']}",
-                style: GoogleFonts.kumbhSans(
-                    fontSize: 12, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(
-                height: 3,
-              ),
-              GestureDetector(
-                onTap: () => {},
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: primaryColor),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Text(
-                    "Tambah",
-                    style: GoogleFonts.kumbhSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: primaryColor),
-                  ),
-                ),
-              )
-            ]),
+          return GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: EdgeInsets.all(AppSizes.md),
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            listGalon[index]['image'],
+                            width: 100,
+                          ),
+                          const SizedBox(
+                            height: 35,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  itemController.addCounter();
+                                },
+                                child: const CircleAvatar(
+                                  backgroundColor: AppColors.primary,
+                                  child: Icon(Iconsax.add),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 30,
+                              ),
+                              Obx(() => Text(
+                                    "${itemController.count.value}",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displaySmall!
+                                        .apply(
+                                            color: isDark
+                                                ? AppColors.light
+                                                : AppColors.dark),
+                                  )),
+                              const SizedBox(
+                                width: 30,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    itemController.minCounter();
+                                  });
+                                },
+                                child: const CircleAvatar(
+                                  backgroundColor: AppColors.primary,
+                                  child: Icon(Iconsax.minus),
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 35,
+                          ),
+                          SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                  onPressed: () {},
+                                  child: Text(
+                                    "Pesan",
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                  )))
+                        ],
+                      ),
+                    );
+                  }).whenComplete(() => itemController.count.value = 1);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: primaryColor, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5), //color of shadow
+                      spreadRadius: 1, //spread radius
+                      blurRadius: 7, // blur radius
+                      offset: Offset(0, 2),
+                    )
+                  ]),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${listGalon[index]['nama']}",
+                      style: GoogleFonts.boogaloo(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w400,
+                          color: primaryColor),
+                    ),
+                    Image.asset(
+                      listGalon[index]['image'],
+                      width: 100,
+                    ),
+                    Text(
+                      "${listGalon[index]['harga']}",
+                      style: GoogleFonts.kumbhSans(
+                          fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
+                    ),
+                    const SizedBox(
+                      height: 3,
+                    ),
+                  ]),
+            ),
           );
         });
   }
