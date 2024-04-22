@@ -2,6 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tubes_galon/common/styles/spacing_styles.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/register/register.dart';
+import 'package:flutter_tubes_galon/features/common/screens/home/home.dart';
+import 'package:flutter_tubes_galon/main_menu.dart';
 import 'package:flutter_tubes_galon/utils/constants/colors.dart';
 import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
 import 'package:get/get.dart';
@@ -39,17 +41,6 @@ class LoginScreen extends StatelessWidget {
               TextField(
                 cursorColor: Colors.blueAccent,
                 decoration: InputDecoration(
-                    labelText: 'Nama Lengkap',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(
-                            color: Colors.lightBlue,
-                            style: BorderStyle.solid))),
-              ),
-              const SizedBox(height: 20.0),
-              TextField(
-                cursorColor: Colors.blueAccent,
-                decoration: InputDecoration(
                     labelText: 'No Telfon',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -70,22 +61,32 @@ class LoginScreen extends StatelessWidget {
                             style: BorderStyle.solid))),
               ),
               const SizedBox(height: 20.0),
-              SizedBox(width: double.infinity, child: ElevatedButton(onPressed: (){}, child: const Text("Daftar"))),
+              SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        Get.offAll(MainMenu());
+                      },
+                      child: const Text("Masuk"))),
               const SizedBox(
                 height: AppSizes.spaceBtwItems,
               ),
-              RichText(text: TextSpan(
-                text: "Belum punya akun?",
-                style: Theme.of(context).textTheme.labelLarge,
-                children: [
-                  TextSpan(
-                    text: " Daftar",
-                    style: Theme.of(context).textTheme.labelLarge!.apply(color: AppColors.primary),
-                    recognizer: TapGestureRecognizer()..onTap = (){Get.to(const RegisterScreen());}
-                  )
-                ]
-              )),
-              
+              RichText(
+                  text: TextSpan(
+                      text: "Belum punya akun?",
+                      style: Theme.of(context).textTheme.labelLarge,
+                      children: [
+                    TextSpan(
+                        text: " Daftar",
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge!
+                            .apply(color: AppColors.primary),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Get.to(const RegisterScreen());
+                          })
+                  ])),
             ],
           ),
         ),

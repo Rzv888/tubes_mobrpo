@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: const RegisterScreen() 
+      home: const OnboardingScreen() 
     );
   }
 }
