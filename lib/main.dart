@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tubes_galon/features/authentication/screens/login/login.dart';
+import 'package:flutter_tubes_galon/features/authentication/screens/onboarding/widgets/onboarding_page.dart';
+import 'package:flutter_tubes_galon/features/authentication/screens/register/register.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/onboarding/onboarding.dart';
 import 'package:flutter_tubes_galon/utils/theme/theme.dart';
 import 'package:get/get.dart';
@@ -31,7 +34,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: const OnboardingScreen()
+      home: const RegisterScreen() 
     );
   }
 }
