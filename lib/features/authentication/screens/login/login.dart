@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tubes_galon/common/styles/spacing_styles.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/register/register.dart';
 import 'package:flutter_tubes_galon/features/common/screens/home/home.dart';
 import 'package:flutter_tubes_galon/main_menu.dart';
@@ -9,11 +10,20 @@ import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
 import 'package:get/get.dart';
 // import 'package:flutter_tubes_galon/utils/helpers/helper_functions.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool isLoading = false;
+
+  @override
   Widget build(BuildContext context) {
+    TextEditingController email_controller = TextEditingController();
+    TextEditingController password_controller = TextEditingController();
     return Scaffold(
       body: Padding(
         padding: AppSpacingStyle.paddingWithAppBarHeight,
@@ -41,7 +51,7 @@ class LoginScreen extends StatelessWidget {
               TextField(
                 cursorColor: Colors.blueAccent,
                 decoration: InputDecoration(
-                    labelText: 'No Telfon',
+                    labelText: 'Email',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: const BorderSide(
@@ -61,13 +71,22 @@ class LoginScreen extends StatelessWidget {
                             style: BorderStyle.solid))),
               ),
               const SizedBox(height: 20.0),
-              SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                      onPressed: () {
-                        Get.offAll(MainMenu());
-                      },
-                      child: const Text("Masuk"))),
+              (isLoading)
+                  ? Text("Loading")
+                  : SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                          onPressed: () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            await AuthService().login(email_controller.text,
+                                password_controller.text, context);
+                            setState(() {
+                              isLoading = false;
+                            });
+                          },
+                          child: const Text("Masuk"))),
               const SizedBox(
                 height: AppSizes.spaceBtwItems,
               ),
