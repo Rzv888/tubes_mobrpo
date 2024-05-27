@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/features/common/screens/history/main.dart';
 import 'package:flutter_tubes_galon/features/common/screens/home/home.dart';
 import 'package:flutter_tubes_galon/features/common/screens/chat/chat.dart';
@@ -30,6 +31,7 @@ class _MainMenuState extends State<MainMenu> {
   @override
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
+
     return Scaffold(
       body: Obx(
           () => mainMenuController.screens[mainMenuController.currIndex.value]),

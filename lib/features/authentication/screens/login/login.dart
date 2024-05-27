@@ -61,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20.0),
               TextField(
                 obscureText: true,
+                controller: password_controller,
                 cursorColor: Colors.blueAccent,
                 decoration: InputDecoration(
                     labelText: 'Password',
@@ -80,8 +81,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             setState(() {
                               isLoading = true;
                             });
-                            await AuthService().login(email_controller.text,
-                                password_controller.text, context);
+                            await AuthService().login(
+                                email_controller.text.trim(),
+                                password_controller.text.trim(),
+                                context);
+                            print(password_controller.text);
                             setState(() {
                               isLoading = false;
                             });

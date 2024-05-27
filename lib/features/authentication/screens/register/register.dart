@@ -21,6 +21,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     TextEditingController email_controller = TextEditingController();
     TextEditingController nowa_controller = TextEditingController();
+    TextEditingController alamat_controller = TextEditingController();
+
     TextEditingController namalengkap_controller = TextEditingController();
 
     TextEditingController password_controller = TextEditingController();
@@ -86,6 +88,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 20.0),
               TextField(
+                controller: alamat_controller,
+                cursorColor: Colors.blueAccent,
+                decoration: InputDecoration(
+                    labelText: 'Alamat',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                            color: Colors.lightBlue,
+                            style: BorderStyle.solid))),
+              ),
+              const SizedBox(height: 20.0),
+              TextField(
                 controller: password_controller,
                 obscureText: true,
                 cursorColor: Colors.blueAccent,
@@ -107,8 +121,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             setState(() {
                               isLoading = true;
                             });
-                            await AuthService().register(email_controller.text,
-                                password_controller.text, context);
+                            await AuthService().register(
+                                email_controller.text,
+                                password_controller.text,
+                                namalengkap_controller.text,
+                                alamat_controller.text,
+                                nowa_controller.text,
+                                context);
                             setState(() {
                               isLoading = false;
                             });
