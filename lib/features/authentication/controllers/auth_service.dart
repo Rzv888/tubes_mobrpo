@@ -1,3 +1,4 @@
+import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/main_menu.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
@@ -38,16 +39,18 @@ class AuthService {
     }
   }
 
-  Future<void> register(
-      String email, String password, BuildContext context) async {
+  Future<void> register(String email, String password, String name,
+      String alamat, String no_wa, BuildContext context) async {
     try {
       print(":masuk sini" + email + password);
       final AuthResponse res =
           await supabase.auth.signUp(email: email, password: password);
       print("yum: _" + res.toString());
       final User? user = res.user;
+
       print("Berhasil regis" + user.toString());
       if (user != null) {
+        UserService().createUser(name, alamat, no_wa, email, context);
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => MainMenu()),

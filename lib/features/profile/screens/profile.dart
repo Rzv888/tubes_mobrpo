@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
+import 'package:flutter_tubes_galon/features/authentication/screens/login/login.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -92,7 +94,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: <Widget>[
                 TextField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(hintText: "Enter new username"),
+                  decoration:
+                      const InputDecoration(hintText: "Enter new username"),
                 ),
               ],
             ),
@@ -135,15 +138,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(hintText: "Enter new password"),
+                  decoration:
+                      const InputDecoration(hintText: "Enter new password"),
                 ),
                 TextField(
                   controller: _addressController,
-                  decoration: const InputDecoration(hintText: "Enter new address"),
+                  decoration:
+                      const InputDecoration(hintText: "Enter new address"),
                 ),
                 TextField(
                   controller: _phoneNumberController,
-                  decoration: const InputDecoration(hintText: "Enter new phone number"),
+                  decoration:
+                      const InputDecoration(hintText: "Enter new phone number"),
                 ),
               ],
             ),
@@ -174,8 +180,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _logout() {
     // Handle logout functionality
-    // For example, you can navigate to the login screen or clear user session
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LoginScreen()));
+    AuthService().logout(
+        context); // For example, you can navigate to the login screen or clear user session
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginScreen()));
   }
 
   @override
@@ -251,7 +259,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
@@ -265,7 +274,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 20),
                       ListTile(
-                        leading: const Icon(Icons.location_on, color: Colors.grey),
+                        leading:
+                            const Icon(Icons.location_on, color: Colors.grey),
                         title: Text(_address),
                       ),
                       ListTile(
@@ -280,12 +290,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ElevatedButton(
                         onPressed: _editProfile,
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text('Edit Profile', style: TextStyle(fontSize: 16)),
+                        child: const Text('Edit Profile',
+                            style: TextStyle(fontSize: 16)),
                       ),
                     ],
                   ),
@@ -296,7 +308,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: _logout,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -308,18 +321,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Center(child: const Text('Login Screen')),
     );
   }
 }
