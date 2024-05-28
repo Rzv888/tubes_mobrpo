@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tubes_galon/data/list_galon.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/features/common/controllers/home/AddItemController.dart';
 import 'package:flutter_tubes_galon/features/profile/screens/profile.dart';
 import 'package:flutter_tubes_galon/features/saldo/screens/saldo.dart';
@@ -20,7 +21,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String _namalengkap = "";
+  int _saldo = 0;
+  int _level = 0;
+  int _xp = 0;
   int currIndex = 0;
+  Future<void> refreshDataUser(context) async {
+    final user = await UserService().getCurrentUser();
+    print(("cek" + user.toString()));
+    _namalengkap = user["nama_lengkap"];
+    _level = user['level'];
+    _xp = user['xp'];
+    _saldo = user['saldo'];
+
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    refreshDataUser(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: greyColor),
                       ),
                       Text(
-                        "Ganjar Prabowo",
+                        _namalengkap,
                         style: GoogleFonts.kumbhSans(
                             fontSize: 25,
                             fontWeight: FontWeight.w700,
@@ -135,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: AppColors.dark),
                                 ),
                                 Text(
-                                  "Rp. 5.000",
+                                  "Rp. " + _saldo.toString(),
                                   style: GoogleFonts.boogaloo(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
@@ -153,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Level 1",
+                          "Level " + _level.toString(),
                           style: GoogleFonts.boogaloo(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
@@ -168,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   BorderRadius.all(Radius.circular(10))),
                         ),
                         Text(
-                          "0/200",
+                          _xp.toString() + "/200",
                           style: GoogleFonts.boogaloo(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
@@ -337,7 +358,9 @@ class _ListItemsState extends State<ListItems> {
                     Text(
                       "${listGalon[index]['harga']}",
                       style: GoogleFonts.kumbhSans(
-                          fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary),
                     ),
                     const SizedBox(
                       height: 3,

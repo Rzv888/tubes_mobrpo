@@ -28,10 +28,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> refreshDataUser(context) async {
     final user = await UserService().getCurrentUser();
+    print(("cek" + user.toString()));
     _namalengkap = user["nama_lengkap"];
     _address = user['alamat'];
-    _phoneNumber = user['now_wa'];
-    print(("cek" + user));
+    _phoneNumber = user['no_wa'];
 
     setState(() {});
   }
@@ -198,8 +198,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    // TODO: implement initState
     refreshDataUser(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile Page'),
