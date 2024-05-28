@@ -8,6 +8,7 @@ class AuthService {
   Future<void> login(
       String email, String password, BuildContext context) async {
     try {
+      print("email" + email + "password " + password);
       final AuthResponse res = await supabase.auth
           .signInWithPassword(email: email, password: password);
       final User? user = res.user;
@@ -105,9 +106,8 @@ class AuthService {
     }
   }
 
-  Future<void> getUser() async {
+  Future<String> getUserEmail() async {
     List<UserIdentity> user = await supabase.auth.getUserIdentities();
-    print("Hasil" + user[0].identityData.toString());
-    // return u/ser;
+    return user[0].identityData?["email"];
   }
 }

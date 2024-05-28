@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: AppSizes.spaceBtwItems,
               ),
               TextField(
+                controller: email_controller,
                 cursorColor: Colors.blueAccent,
                 decoration: InputDecoration(
                     labelText: 'Email',

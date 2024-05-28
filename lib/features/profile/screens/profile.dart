@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/login/login.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -15,15 +16,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
-  String _username = 'John Doe';
+  String _namalengkap = 'John Doe';
   String _password = 'password123';
   String _address = 'Sukabirus';
   String _phoneNumber = '081888888888';
 
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _namalengkapController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+
+  Future<void> refreshDataUser(context) async {
+    final user = await UserService().getCurrentUser();
+    _namalengkap = user["nama_lengkap"];
+    _address = user['alamat'];
+    _phoneNumber = user['now_wa'];
+    print(("cek" + user));
+
+    setState(() {});
+  }
 
   Future<void> _showPicker(context) async {
     showModalBottomSheet(
@@ -82,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _editUsername() {
-    _usernameController.text = _username;
+    _namalengkapController.text = _namalengkap;
 
     showDialog(
       context: context,
@@ -93,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: <Widget>[
                 TextField(
-                  controller: _usernameController,
+                  controller: _namalengkapController,
                   decoration:
                       const InputDecoration(hintText: "Enter new username"),
                 ),
@@ -111,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: const Text('SAVE'),
               onPressed: () {
                 setState(() {
-                  _username = _usernameController.text;
+                  _namalengkap = _namalengkapController.text;
                 });
                 Navigator.of(context).pop();
               },
@@ -188,6 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    refreshDataUser(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile Page'),
@@ -241,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _username,
+                    _namalengkap,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

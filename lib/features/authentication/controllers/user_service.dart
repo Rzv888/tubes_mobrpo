@@ -1,3 +1,4 @@
+import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
 import 'package:flutter_tubes_galon/main_menu.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
@@ -35,5 +36,12 @@ class UserService {
             style: TextStyle(color: Colors.white),
           )));
     }
+  }
+
+  Future<dynamic> getCurrentUser() async {
+    final email = await AuthService().getUserEmail();
+    final user = await supabase.from("users").select().match({'email': email});
+    print("nama" + user[0]["nama_lengkap"]);
+    return user[0];
   }
 }
