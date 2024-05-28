@@ -219,124 +219,122 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                GestureDetector(
-                  onTap: () {
-                    _showPicker(context);
-                  },
-                  child: CircleAvatar(
-                    radius: 55,
-                    backgroundColor: Colors.grey[200],
-                    child: _image != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: Image.file(
-                              _image!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(50),
-                            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  _showPicker(context);
+                },
+                child: CircleAvatar(
+                  radius: 55,
+                  backgroundColor: Colors.grey[200],
+                  child: _image != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: Image.file(
+                            _image!,
                             width: 100,
                             height: 100,
-                            child: const Icon(
-                              Icons.camera_alt,
-                              color: Colors.grey,
-                            ),
+                            fit: BoxFit.cover,
                           ),
-                  ),
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          width: 100,
+                          height: 100,
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.grey,
+                          ),
+                        ),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _namalengkap,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _namalengkap,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: _editUsername,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'User Information',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: _editUsername,
-                    ),
-                  ],
+                      const SizedBox(height: 20),
+                      ListTile(
+                        leading:
+                            const Icon(Icons.location_on, color: Colors.grey),
+                        title: Text(_address),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.phone, color: Colors.grey),
+                        title: Text(_phoneNumber),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.lock, color: Colors.grey),
+                        title: const Text('*********'),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: _editProfile,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text('Edit Profile',
+                            style: TextStyle(fontSize: 16)),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 30),
-                Card(
-                  elevation: 4,
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: _logout,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'User Information',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ListTile(
-                          leading:
-                              const Icon(Icons.location_on, color: Colors.grey),
-                          title: Text(_address),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.phone, color: Colors.grey),
-                          title: Text(_phoneNumber),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.lock, color: Colors.grey),
-                          title: const Text('*********'),
-                        ),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: _editProfile,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: const Text('Edit Profile',
-                              style: TextStyle(fontSize: 16)),
-                        ),
-                      ],
-                    ),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: _logout,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text('Logout', style: TextStyle(fontSize: 16)),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+                child: const Text('Logout', style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
