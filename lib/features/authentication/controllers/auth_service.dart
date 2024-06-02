@@ -107,7 +107,14 @@ class AuthService {
   }
 
   Future<String> getUserEmail() async {
-    List<UserIdentity> user = await supabase.auth.getUserIdentities();
-    return user[0].identityData?["email"];
+    try {
+      List<UserIdentity> user = await supabase.auth.getUserIdentities();
+
+      return user[0].identityData?["email"];
+    } catch (e) {
+      print(e);
+      return """
+default""";
+    }
   }
 }
