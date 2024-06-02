@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -16,15 +16,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
-  String _namalengkap = 'John Doe';
-  String _password = 'password123';
-  String _address = 'Sukabirus';
-  String _phoneNumber = '081888888888';
+  String _namalengkap = '';
+  String _password = '';
+  String _address = '';
+  String _phoneNumber = '';
+  String _email = '';
 
   final TextEditingController _namalengkapController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   Future<void> refreshDataUser(context) async {
     final user = await UserService().getCurrentUser();
@@ -32,34 +34,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _namalengkap = user["nama_lengkap"];
     _address = user['alamat'];
     _phoneNumber = user['no_wa'];
+    _email = user['email'];
 
     setState(() {});
   }
 
   Future<void> _showPicker(context) async {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double sheetHeight = screenHeight * 0.5;
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
-                onTap: () {
-                  _imgFromGallery();
-                  Navigator.of(context).pop();
-                },
+        return Container(
+          height: sheetHeight,
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Wrap(
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.photo_library),
+                    title: const Text('Gallery'),
+                    onTap: () {
+                      _imgFromGallery();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera),
+                    title: const Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
               ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Camera'),
-                onTap: () {
-                  _imgFromCamera();
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -102,11 +113,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: const Text('Edit Username'),
           content: SingleChildScrollView(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextField(
                   controller: _namalengkapController,
-                  decoration:
-                      const InputDecoration(hintText: "Enter new username"),
+                  decoration: const InputDecoration(hintText: "Enter new username"),
                 ),
               ],
             ),
@@ -137,6 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _passwordController.text = _password;
     _addressController.text = _address;
     _phoneNumberController.text = _phoneNumber;
+    _emailController.text = _email;
 
     showDialog(
       context: context,
@@ -145,22 +157,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: const Text('Edit Profile'),
           content: SingleChildScrollView(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(hintText: "Enter new email"),
+                ),
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration:
-                      const InputDecoration(hintText: "Enter new password"),
-                ),
-                TextField(
-                  controller: _addressController,
-                  decoration:
-                      const InputDecoration(hintText: "Enter new address"),
+                  decoration: const InputDecoration(hintText: "Enter new password"),
                 ),
                 TextField(
                   controller: _phoneNumberController,
-                  decoration:
-                      const InputDecoration(hintText: "Enter new phone number"),
+                  decoration: const InputDecoration(hintText: "Enter new phone number"),
+                ),
+                TextField(
+                  controller: _addressController,
+                  decoration: const InputDecoration(hintText: "Enter new address"),
                 ),
               ],
             ),
@@ -179,6 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _password = _passwordController.text;
                   _address = _addressController.text;
                   _phoneNumber = _phoneNumberController.text;
+                  _email = _emailController.text;
                 });
                 Navigator.of(context).pop();
               },
@@ -199,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     refreshDataUser(context);
   }
 
@@ -231,26 +246,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: Colors.grey[200],
                   child: _image != null
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: Image.file(
-                            _image!,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        )
+                    borderRadius: BorderRadius.circular(50),
+                    child: Image.file(
+                      _image!,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  )
                       : Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          width: 100,
-                          height: 100,
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.grey,
-                          ),
-                        ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    width: 100,
+                    height: 100,
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -259,10 +274,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text(
                     _namalengkap,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(                  
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    )
                   ),
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.blue),
@@ -291,17 +306,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 20),
                       ListTile(
-                        leading:
-                            const Icon(Icons.location_on, color: Colors.grey),
-                        title: Text(_address),
+                        leading: const Icon(Icons.email, color: Colors.grey),
+                        title: Text(_email),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.lock, color: Colors.grey),
+                        title: const Text('*********'),
                       ),
                       ListTile(
                         leading: const Icon(Icons.phone, color: Colors.grey),
                         title: Text(_phoneNumber),
                       ),
                       ListTile(
-                        leading: const Icon(Icons.lock, color: Colors.grey),
-                        title: const Text('*********'),
+                        leading:
+                            const Icon(Icons.location_on, color: Colors.grey),
+                        title: Text(_address),
                       ),
                       const SizedBox(height: 10),
                       ElevatedButton(
@@ -341,3 +360,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+
