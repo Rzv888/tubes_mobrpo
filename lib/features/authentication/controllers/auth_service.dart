@@ -96,12 +96,12 @@ class AuthService {
     } catch (e) {
       print(e);
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text(
-            e.toString(),
-            style: TextStyle(color: Colors.deepOrange),
-          )));
+      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      //     backgroundColor: Colors.redAccent,
+      //     content: Text(
+      //       e.toString(),
+      //       style: TextStyle(color: Colors.deepOrange),
+      //     )));
       print(e);
     }
   }
