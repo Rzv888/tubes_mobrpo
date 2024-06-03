@@ -54,12 +54,6 @@ class _TransactionItemState extends State<TransactionItem> {
                     const SizedBox(
                       height: 20,
                     ),
-                    const TextField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: "Masukkan PIN",
-                      ),
-                    ),
                     const SizedBox(
                       height: 20,
                     ),
