@@ -26,15 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
   int _level = 0;
   int _xp = 0;
   int currIndex = 0;
-  Future<void> refreshDataUser(context) async {
+  Future<dynamic> refreshDataUser(context) async {
     final user = await UserService().getCurrentUser();
     print(("cek" + user.toString()));
     _namalengkap = user["nama_lengkap"];
     _level = user['level'];
     _xp = user['xp'];
     _saldo = user['saldo'];
-
+    print(_saldo.toString() + "saldo: ");
     setState(() {});
+    return user;
   }
 
   @override
@@ -155,13 +156,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.dark),
                                 ),
-                                Text(
-                                  "Rp. " + _saldo.toString(),
-                                  style: GoogleFonts.boogaloo(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.dark),
-                                )
+                                FutureBuilder(
+                                    future: refreshDataUser(context),
+                                    builder: (context, snapshot) {
+                                      return Text(
+                                        "Rp. " + _saldo.toString(),
+                                        style: GoogleFonts.boogaloo(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.dark),
+                                      );
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return CircularProgressIndicator();
+                                      } else if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      } else if (snapshot.hasData) {
+                                      } else {
+                                        return Text(
+                                          "Rp. " + _saldo.toString(),
+                                          style: GoogleFonts.boogaloo(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.dark),
+                                        );
+                                      }
+                                    })
                               ],
                             )
                           ],

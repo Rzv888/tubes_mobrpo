@@ -26,9 +26,11 @@ class _SaldoScreenState extends State<SaldoScreen> {
   Future<void> refreshDataUser(context) async {
     final user = await UserService().getCurrentUser();
     print(("cek" + user.toString()));
+    setState(() {
     _saldo = user['saldo'];
 
-    setState(() {});
+
+    });
   }
 
   @override

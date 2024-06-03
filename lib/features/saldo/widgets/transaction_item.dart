@@ -18,6 +18,23 @@ class TransactionItem extends StatefulWidget {
 }
 
 class _TransactionItemState extends State<TransactionItem> {
+  int _saldo = 0;
+  Future<void> refreshDataUser(context) async {
+    final user = await UserService().getCurrentUser();
+    print(("cek" + user.toString()));
+    _saldo = user['saldo'].toInt();
+    print("Saldo saat ini" + _saldo.toString());
+    
+
+
+    setState(() {});
+  }
+  @override
+  void initState() {
+    refreshDataUser(context);
+    // TODO: implement initState
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
@@ -51,12 +68,13 @@ class _TransactionItemState extends State<TransactionItem> {
                       child: ElevatedButton(
                         onPressed: () {
                           UserService().updateSaldo(widget.transaction.amount);
+                        refreshDataUser(context);
                         },
                         child: Text("Top Up"),
                       ),
                     )
                   ],
-                ),
+                ),  
               );
             });
       },
@@ -131,7 +149,7 @@ class _TransactionItemState extends State<TransactionItem> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'Rp. ${widget.transaction.amount}',
+                    'Rp. ${_saldo}',
                     style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFFFA6D6D),
