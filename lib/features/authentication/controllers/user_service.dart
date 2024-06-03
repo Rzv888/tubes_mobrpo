@@ -44,4 +44,11 @@ class UserService {
     print("nama" + user[0]["nama_lengkap"]);
     return user[0];
   }
+
+  Future<void> updateSaldo(int saldo) async {
+    final user = await UserService().getCurrentUser();
+    int curSaldo = user["saldo"] + saldo;
+    await supabase.from("users").update({'saldo': curSaldo}).match({"email":user["email"]});
+    
+  }
 }

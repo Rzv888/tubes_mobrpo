@@ -1,7 +1,7 @@
 class Transaction{
   final int id;
   final String to;
-  final String amount;
+  final int amount;
   final String date;
   final String description;
 
@@ -18,42 +18,42 @@ final List<Transaction> transactions = [
   Transaction(
     1,
     'Paket 1',
-    '5.000',
+    5000,
     'Disc',
     '1.000'
   ),
   Transaction(
     2,
     'Paket 2',
-    '10.000',
+    10000,
     'Disc',
     '1.000'
   ),
   Transaction(
     3,
     'Paket 3',
-    '15.000',
+    15000,
     'Disc',
     '1.000'
   ),
   Transaction(
     4,
     'Paket 4',
-    '30.000',
+    30000,
     'Disc',
     '1.000'
   ),
   Transaction(
     5,
     'Paket 5',
-    '50.000',
+    50000,
     'Disc',
     '1.000'
   ),
   Transaction(
     6,
     'Paket 6',
-    '100.000',
+    100000,
     'Disc',
     '1.000'
   ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/utils/constants/colors.dart';
 import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
 import 'package:flutter_tubes_galon/utils/helpers/helper_functions.dart';
 import '../models/transaction.dart';
 
-class TransactionItem extends StatelessWidget {
+class TransactionItem extends StatefulWidget {
   final Transaction transaction;
 
   const TransactionItem({
@@ -13,30 +14,52 @@ class TransactionItem extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<TransactionItem> createState() => _TransactionItemState();
+}
+
+class _TransactionItemState extends State<TransactionItem> {
+  @override
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
     return GestureDetector(
       onTap: () {
-          showModalBottomSheet(context: context, builder: (BuildContext ctx) {
-            return Padding(
-              padding: const EdgeInsets.all(AppSizes.md),
-              child: Column(
-                children: [
-                  Text("${transaction.to}  (${transaction.amount})", style: Theme.of(context).textTheme.headlineSmall,),
-                  const SizedBox(height: 20,),
-                  const TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: "Masukkan PIN",
+        showModalBottomSheet(
+            context: context,
+            builder: (BuildContext ctx) {
+              return Padding(
+                padding: const EdgeInsets.all(AppSizes.md),
+                child: Column(
+                  children: [
+                    Text(
+                      "${widget.transaction.to}  (${widget.transaction.amount})",
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                  ),
-                  const SizedBox(height: 20,),
-                  SizedBox(width: double.infinity, child: ElevatedButton(onPressed: () {},child: Text("Top Up"),),)
-                ],
-              ),
-            );
-          });
-        },
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const TextField(
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: "Masukkan PIN",
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          UserService().updateSaldo(widget.transaction.amount);
+                        },
+                        child: Text("Top Up"),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            });
+      },
       child: Container(
         margin: const EdgeInsets.all(10),
         padding: const EdgeInsets.symmetric(
@@ -63,7 +86,7 @@ class TransactionItem extends StatelessWidget {
                 height: 35,
                 child: Center(
                   child: Text(
-                    transaction.to
+                    widget.transaction.to
                         .split('')
                         .map((e) => e.substring(0, 1))
                         .toList()
@@ -84,7 +107,7 @@ class TransactionItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      transaction.to,
+                      widget.transaction.to,
                       style: TextStyle(
                         fontSize: 15,
                         color: isDark ? AppColors.light : Color(0xFF3D538F),
@@ -108,7 +131,7 @@ class TransactionItem extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'Rp. ${transaction.amount}',
+                    'Rp. ${widget.transaction.amount}',
                     style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFFFA6D6D),
