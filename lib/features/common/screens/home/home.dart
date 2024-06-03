@@ -166,21 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontWeight: FontWeight.w700,
                                             color: AppColors.dark),
                                       );
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return CircularProgressIndicator();
-                                      } else if (snapshot.hasError) {
-                                        return Text('Error: ${snapshot.error}');
-                                      } else if (snapshot.hasData) {
-                                      } else {
-                                        return Text(
-                                          "Rp. " + _saldo.toString(),
-                                          style: GoogleFonts.boogaloo(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.dark),
-                                        );
-                                      }
                                     })
                               ],
                             )
