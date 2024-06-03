@@ -117,4 +117,16 @@ class AuthService {
 default""";
     }
   }
+
+  Future<String> getUserId() async {
+    try {
+      List<UserIdentity> user = await supabase.auth.getUserIdentities();
+
+      return user[0].identityData?["id"];
+    } catch (e) {
+      print(e);
+      return """
+default""";
+    }
+  }
 }

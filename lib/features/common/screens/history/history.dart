@@ -1,14 +1,12 @@
-import "package:flutter/material.dart";
-import "package:flutter_tubes_galon/common/widgets/screen_template.dart";
-import "package:flutter_tubes_galon/utils/constants/sizes.dart";
+import 'package:flutter/material.dart';
+import 'package:flutter_tubes_galon/common/widgets/screen_template.dart';
+import 'package:flutter_tubes_galon/features/common/controllers/home/history_service.dart';
 
 class GalonPurchase {
-  final String storeLocation;
   final List<Galon> gallons;
   final DateTime purchaseDate;
 
   GalonPurchase({
-    required this.storeLocation,
     required this.gallons,
     required this.purchaseDate,
   });
@@ -34,90 +32,127 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  List<GalonPurchase> _purchases = [
-    GalonPurchase(
-      storeLocation: 'Kurnia Air',
-      gallons: [
-        Galon(brand: 'Aqua 20 Liter', jumlahGalon: 2, price: 22.000),
-        Galon(brand: 'Le Minerale 15 Liter', jumlahGalon: 1, price: 17.000),
-      ],
-      purchaseDate: DateTime(2024, 3, 28, 10, 30),
-    ),
-    GalonPurchase(
-      storeLocation: 'Air Mulia',
-      gallons: [
-        Galon(brand: 'Aqua 20 Liter', jumlahGalon: 1, price: 22.000),
-        Galon(brand: 'Le Minerale 15 Liter', jumlahGalon: 2, price: 17.000),
-      ],
-      purchaseDate: DateTime(2024, 3, 26, 9, 15),
-    ),
-  ];
+  late Future<List<GalonPurchase>> _futurePurchases;
+
+  @override
+  void initState() {
+    super.initState();
+    _futurePurchases = _fetchPurchases();
+  }
+
+  Future<List<GalonPurchase>> _fetchPurchases() async {
+    final historyService = HistoryService();
+    final historyData = await historyService.getHistory();
+
+    List<GalonPurchase> purchases = [];
+
+    for (var item in historyData) {
+      DateTime purchaseDate = DateTime.parse(item['purchase_date']);
+      Galon galon = Galon(
+        brand: item['nama_barang'],
+        jumlahGalon: item['jumlah_barang'],
+        price: item['harga_barang'],
+      );
+
+      GalonPurchase purchase = purchases.firstWhere(
+        (p) => p.purchaseDate == purchaseDate,
+        orElse: () => GalonPurchase(
+          gallons: [],
+          purchaseDate: purchaseDate,
+        ),
+      );
+
+      if (purchase.gallons.isEmpty) {
+        purchases.add(purchase);
+      }
+
+      purchase.gallons.add(galon);
+    }
+
+    return purchases;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScreenTemplate(title: "Riwayat", child: ListView.builder(
-        itemCount: _purchases.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              _showPurchaseDetailsDialog(context, _purchases[index]);
-            },
-            child: Card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('${_purchases[index].storeLocation}'),
-                        Text(
-                          'Rp${_calculateTotalPrice(_purchases[index]).toStringAsFixed(3)}',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    subtitle: Column(
+    return ScreenTemplate(
+      title: "Riwayat",
+      child: FutureBuilder<List<GalonPurchase>>(
+        future: _futurePurchases,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No purchase history available.'));
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    _showPurchaseDetailsDialog(context, snapshot.data![index]);
+                  },
+                  child: Card(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              '${_purchases[index].purchaseDate.day.toString().padLeft(2, '0')}-${_purchases[index].purchaseDate.month.toString().padLeft(2, '0')}-${_purchases[index].purchaseDate.year}',
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              '${_purchases[index].purchaseDate.hour.toString().padLeft(2, '0')}:${_purchases[index].purchaseDate.minute.toString().padLeft(2, '0')}',
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: Text(
-                              'Beli Lagi',
-                              style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
+                        ListTile(
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Rp${_calculateTotalPrice(snapshot.data![index]).toStringAsFixed(3)}',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
+                            ],
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    '${snapshot.data![index].purchaseDate.day.toString().padLeft(2, '0')}-${snapshot.data![index].purchaseDate.month.toString().padLeft(2, '0')}-${snapshot.data![index].purchaseDate.year}',
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '${snapshot.data![index].purchaseDate.hour.toString().padLeft(2, '0')}:${snapshot.data![index].purchaseDate.minute.toString().padLeft(2, '0')}',
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: Text(
+                                    'Beli Lagi',
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          );
+                );
+              },
+            );
+          }
         },
-      ));
-      
+      ),
+    );
   }
+
   void _showPurchaseDetailsDialog(
       BuildContext context, GalonPurchase purchase) {
     if (purchase.gallons.isEmpty) {
