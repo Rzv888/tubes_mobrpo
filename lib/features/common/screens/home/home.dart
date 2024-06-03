@@ -14,6 +14,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -240,134 +241,186 @@ class ListItems extends StatefulWidget {
 }
 
 class _ListItemsState extends State<ListItems> {
+  final _future = Supabase.instance.client.from("products").select();
   @override
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
     final itemController = Get.put(AddItemController());
-    return GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            mainAxisExtent: 150),
-        itemCount: listGalon.length,
-        itemBuilder: (_, index) {
-          return GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Padding(
-                      padding: EdgeInsets.all(AppSizes.md),
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            listGalon[index]['image'],
-                            width: 100,
-                          ),
-                          const SizedBox(
-                            height: 35,
-                          ),
-                          Row(
+    return FutureBuilder(
+        future: _future,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final products = snapshot.data!;
+          print(products.toString() + "jallo");
+
+          return GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  mainAxisExtent: 150),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Padding(
+                            padding: EdgeInsets.all(AppSizes.md),
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  // listGalon[index]['image'],
+                                  product['image'],
+                                  width: 100,
+                                ),
+                                const SizedBox(
+                                  height: 35,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        itemController.addCounter();
+                                      },
+                                      child: const CircleAvatar(
+                                        backgroundColor: AppColors.primary,
+                                        child: Icon(Iconsax.add),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 30,
+                                    ),
+                                    Obx(() => Text(
+                                          "${itemController.count.value}",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .displaySmall!
+                                              .apply(
+                                                  color: isDark
+                                                      ? AppColors.light
+                                                      : AppColors.dark),
+                                        )),
+                                    const SizedBox(
+                                      width: 30,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          itemController.minCounter();
+                                        });
+                                      },
+                                      child: const CircleAvatar(
+                                        backgroundColor: AppColors.primary,
+                                        child: Icon(Iconsax.minus),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 35,
+                                ),
+                                SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                        onPressed: () async {
+                                          final id_product = product["id"];
+                                          final total_transaksi =
+                                              product["harga_barang"].toInt() *
+                                                  itemController.count.value;
+                                          final id_user = await Supabase
+                                              .instance
+                                              .client
+                                              .auth
+                                              .currentUser
+                                              ?.id;
+                                          final user = (await Supabase
+                                              .instance.client
+                                              .from("users")
+                                              .select()
+                                              .match({
+                                            "user_id": id_user.toString()
+                                          }));
+                                          await Supabase.instance.client
+                                              .from("users")
+                                              .update({
+                                            "saldo": (user[0]["saldo"].toInt() -
+                                                (total_transaksi).toInt())
+                                          }).match({
+                                            "user_id": id_user.toString()
+                                          });
+                                          await Supabase.instance.client
+                                              .from('orders')
+                                              .insert({
+                                            'id_barang': id_product,
+                                            'id_pemesan': user[0]["id"],
+                                            'jumlah_barang':
+                                                itemController.count.value,
+                                            'total_transaksi': total_transaksi
+                                          });
+                                        },
+                                        child: Text(
+                                          "Pesan",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge,
+                                        )))
+                              ],
+                            ),
+                          );
+                        }).whenComplete(() => itemController.count.value = 1);
+                  },
+                  child: SafeArea(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: primaryColor, width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey
+                                  .withOpacity(0.5), //color of shadow
+                              spreadRadius: 1, //spread radius
+                              blurRadius: 7, // blur radius
+                              offset: Offset(0, 2),
+                            )
+                          ]),
+                      child: SafeArea(
+                        child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  itemController.addCounter();
-                                },
-                                child: const CircleAvatar(
-                                  backgroundColor: AppColors.primary,
-                                  child: Icon(Iconsax.add),
-                                ),
+                              Text(
+                                "${product['nama_barang']}",
+                                style: GoogleFonts.boogaloo(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                    color: primaryColor),
                               ),
-                              const SizedBox(
-                                width: 30,
+                              Image.asset(
+                                product['image'],
+                                // listGalon[index]['image'],
+                                width: 100,
                               ),
-                              Obx(() => Text(
-                                    "${itemController.count.value}",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displaySmall!
-                                        .apply(
-                                            color: isDark
-                                                ? AppColors.light
-                                                : AppColors.dark),
-                                  )),
-                              const SizedBox(
-                                width: 30,
+                              Text(
+                                "${product['harga_barang']}",
+                                style: GoogleFonts.kumbhSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    itemController.minCounter();
-                                  });
-                                },
-                                child: const CircleAvatar(
-                                  backgroundColor: AppColors.primary,
-                                  child: Icon(Iconsax.minus),
-                                ),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 35,
-                          ),
-                          SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    "Pesan",
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  )))
-                        ],
+                            ]),
                       ),
-                    );
-                  }).whenComplete(() => itemController.count.value = 1);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: primaryColor, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5), //color of shadow
-                      spreadRadius: 1, //spread radius
-                      blurRadius: 7, // blur radius
-                      offset: Offset(0, 2),
-                    )
-                  ]),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "${listGalon[index]['nama']}",
-                      style: GoogleFonts.boogaloo(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w400,
-                          color: primaryColor),
                     ),
-                    Image.asset(
-                      listGalon[index]['image'],
-                      width: 100,
-                    ),
-                    Text(
-                      "${listGalon[index]['harga']}",
-                      style: GoogleFonts.kumbhSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary),
-                    ),
-                    const SizedBox(
-                      height: 3,
-                    ),
-                  ]),
-            ),
-          );
+                  ),
+                );
+              });
         });
   }
 }
