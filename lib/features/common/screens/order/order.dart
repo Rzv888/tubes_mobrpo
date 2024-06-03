@@ -1,200 +1,146 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tubes_galon/common/widgets/screen_template.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
 import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
+import 'package:flutter_tubes_galon/features/common/controllers/home/order_service.dart';
+
+class Order {
+  final String id;
+  final String brandImage;
+  final String brandName;
+  final String shippingStatus;
+  final String address;
+  final String phoneNumber;
+  final String name;
+
+  Order({
+    required this.id,
+    required this.brandImage,
+    required this.brandName,
+    required this.shippingStatus,
+    required this.address,
+    required this.phoneNumber,
+    required this.name,
+  });
+
+  factory Order.fromMap(Map<String, dynamic> map) {
+    return Order(
+      id: map['id'],
+      brandImage: map['brandImage'],
+      brandName: map['nama_barang'],
+      shippingStatus: map['status'],
+      address: map['alamat'],
+      phoneNumber: map['no_wa'],
+      name: map['nama_lengkap'],
+    );
+  }
+}
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
 
   @override
-  State<OrderScreen> createState() => _OrderScreenState();
+  _OrderScreenState createState() => _OrderScreenState();
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  int _selectedIndex = 0;
+  List<Order> orders = [];
+  List<Order> history = [];
+  final OrderService orderService = OrderService();
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ScreenTemplate(
-        title: "Pesanan",
-        child: Column(
+  void initState() {
+    super.initState();
+    fetchOrders();
+  }
+
+  Future<void> fetchOrders() async {
+    try {
+      final id = await AuthService().getUserId();
+      if (id != null) {
+        List<Map<String, dynamic>> orderMaps = await orderService.getOrders();
+        setState(() {
+          orders = orderMaps.map((orderMap) => Order.fromMap(orderMap)).toList();
+        });
+        print("Orders fetched: ${orders.length}"); 
+      } else {
+        print("User is not logged in or user ID is null");
+      }
+    } catch (e) {
+      print('Failed to load orders: $e');
+    }
+  }
+
+  Future<void> markAsCompleted(Order order) async {
+    try {
+      await orderService.updateOrderStatus(order.id);
+      setState(() {
+        orders.remove(order);
+        history.add(order);
+      });
+    } catch (e) {
+      print('Failed to update order status: $e');
+    }
+  }
+
+  void showOrderDetails(Order order) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(order.brandName),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: AppSizes.defaultSpace),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedIndex = 0;
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.only(bottom: 5.0),
-                    decoration: BoxDecoration(
-                      border: _selectedIndex == 0
-                          ? Border(
-                              bottom:
-                                  BorderSide(color: Colors.blue, width: 2.0))
-                          : null,
-                    ),
-                    child: Text(
-                      'Dalam Proses',
-                      style: TextStyle(
-                        color: _selectedIndex == 0 ? Colors.blue : Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedIndex = 1;
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.only(bottom: 5.0),
-                    decoration: BoxDecoration(
-                      border: _selectedIndex == 1
-                          ? Border(
-                              bottom:
-                                  BorderSide(color: Colors.blue, width: 2.0))
-                          : null,
-                    ),
-                    child: Text(
-                      'Terjadwal',
-                      style: TextStyle(
-                        color: _selectedIndex == 1 ? Colors.blue : Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedIndex = 2;
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.only(bottom: 5.0),
-                    decoration: BoxDecoration(
-                      border: _selectedIndex == 2
-                          ? Border(
-                              bottom:
-                                  BorderSide(color: Colors.blue, width: 2.0))
-                          : null,
-                    ),
-                    child: Text(
-                      'Selesai',
-                      style: TextStyle(
-                        color: _selectedIndex == 2 ? Colors.blue : Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            _buildBody(),
+            Text('${order.address}'),
+            Text('${order.phoneNumber}'),
+            Text('${order.name}'),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await markAsCompleted(order);
+              Navigator.of(context).pop();
+            },
+            child: Text('Selesai', style: TextStyle(color: Colors.green)),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildBody() {
-    if (_selectedIndex == 0) {
-      return Card(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ListTile(
-                title: Text('Aqua' + ', Bojongsoang'),
-                subtitle: Text('Sedang Diantar'),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/icons/brands/aqua.png'),
+  @override
+  Widget build(BuildContext context) {
+    return ScreenTemplate(
+      title: 'Pesanan',
+      child: Padding(
+        padding: const EdgeInsets.all(AppSizes.defaultSpace),
+        child: orders.isEmpty
+            ? Center(
+                child: Text('Belum ada pesanan'),
+              )
+            : Expanded(
+                child: Container( 
+                  child: ListView.builder(
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      final order = orders[index];
+                      return Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(order.brandImage),
+                          ),
+                          title: Text('${order.brandName} - ${order.address}'),
+                          subtitle: Text(order.shippingStatus),
+                          onTap: () => showOrderDetails(order),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            Divider(),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ListTile(
-                title: Text('Aqua' + ', Bojongsoang'),
-                subtitle: Text('Sedang Diantar'),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/icons/brands/aqua.png'),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (_selectedIndex == 1) {
-      return Card(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ListTile(
-                title: Text('Aqua' + ', Bojongsoang'),
-                subtitle: Text('Senin, 01 April 2024 jam 08:00 - 08:10'),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/icons/brands/aqua.png'),
-                ),
-              ),
-            ),
-            Divider(),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ListTile(
-                title: Text('Aqua' + ', Bojongsoang'),
-                subtitle: Text('Senin, 07 April 2024 jam 08:00 - 08:10'),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/icons/brands/aqua.png'),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Card(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ListTile(
-                title: Text('Aqua' + ', Bojongsoang'),
-                subtitle: Text('Galon Sudah Sampai'),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/icons/brands/aqua.png'),
-                ),
-              ),
-            ),
-            Divider(),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ListTile(
-                title: Text('Aqua' + ', Bojongsoang'),
-                subtitle: Text('Galon Sudah Sampai'),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/icons/brands/aqua.png'),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+      ),
+    );
   }
 }
