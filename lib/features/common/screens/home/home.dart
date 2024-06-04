@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_tubes_galon/data/list_galon.dart';
 import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/features/common/controllers/home/AddItemController.dart';
+import 'package:flutter_tubes_galon/features/common/controllers/home/order_service.dart';
+import 'package:flutter_tubes_galon/features/common/controllers/home/product_service.dart';
 import 'package:flutter_tubes_galon/features/profile/screens/profile.dart';
 import 'package:flutter_tubes_galon/features/saldo/screens/saldo.dart';
 import 'package:flutter_tubes_galon/theme.dart';
@@ -187,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         Container(
                           height: 10,
-                          width: 140,
+                          width: 100,
                           decoration: const BoxDecoration(
                               color: Color(0xffF3EDED),
                               borderRadius:
@@ -212,24 +214,6 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(
             height: 20,
           ),
-          GestureDetector(
-            onTap: () => {},
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-              decoration: BoxDecoration(
-                  color: const Color(0xffE0F9FF),
-                  borderRadius: BorderRadius.circular(20)),
-              child: Text(
-                "Lihat Semua",
-                style: GoogleFonts.kumbhSans(
-                  color: primaryColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
           const SizedBox(
             height: 10,
           ),
@@ -245,134 +229,158 @@ class ListItems extends StatefulWidget {
 }
 
 class _ListItemsState extends State<ListItems> {
+  final products = ProductService().getAllProducts();
+
   @override
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
     final itemController = Get.put(AddItemController());
-    return GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            mainAxisExtent: 150),
-        itemCount: listGalon.length,
-        itemBuilder: (_, index) {
-          return GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Padding(
-                      padding: EdgeInsets.all(AppSizes.md),
+    return FutureBuilder(
+        future: products,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: SizedBox(
+                child: CircularProgressIndicator(),
+                width: 60,
+                height: 60,
+              ),
+            );
+          } else {
+            return GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    mainAxisExtent: 150),
+                itemCount: snapshot.data.length,
+                itemBuilder: (_, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Padding(
+                              padding: EdgeInsets.all(AppSizes.md),
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    snapshot.data[index]["image"],
+                                    width: 100,
+                                  ),
+                                  const SizedBox(
+                                    height: 35,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          itemController.addCounter();
+                                        },
+                                        child: const CircleAvatar(
+                                          backgroundColor: AppColors.primary,
+                                          child: Icon(Iconsax.add),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 30,
+                                      ),
+                                      Obx(() => Text(
+                                            "${itemController.count.value}",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .displaySmall!
+                                                .apply(
+                                                    color: isDark
+                                                        ? AppColors.light
+                                                        : AppColors.dark),
+                                          )),
+                                      const SizedBox(
+                                        width: 30,
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            itemController.minCounter();
+                                          });
+                                        },
+                                        child: const CircleAvatar(
+                                          backgroundColor: AppColors.primary,
+                                          child: Icon(Iconsax.minus),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 35,
+                                  ),
+                                  SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                          onPressed: () {
+                                            OrderService().insertOrder(
+                                                snapshot.data[index]['id'],
+                                                itemController.count.value,
+                                                200000, context);
+                                                SnackBar(content: Text("Order Berhasil Dibuat"));
+                                          },
+                                          child: Text(
+                                            "Pesan",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge,
+                                          )))
+                                ],
+                              ),
+                            );
+                          }).whenComplete(() => itemController.count.value = 1);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: primaryColor, width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey
+                                  .withOpacity(0.5), //color of shadow
+                              spreadRadius: 1, //spread radius
+                              blurRadius: 7, // blur radius
+                              offset: Offset(0, 2),
+                            )
+                          ]),
                       child: Column(
-                        children: [
-                          Image.asset(
-                            listGalon[index]['image'],
-                            width: 100,
-                          ),
-                          const SizedBox(
-                            height: 35,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  itemController.addCounter();
-                                },
-                                child: const CircleAvatar(
-                                  backgroundColor: AppColors.primary,
-                                  child: Icon(Iconsax.add),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 30,
-                              ),
-                              Obx(() => Text(
-                                    "${itemController.count.value}",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displaySmall!
-                                        .apply(
-                                            color: isDark
-                                                ? AppColors.light
-                                                : AppColors.dark),
-                                  )),
-                              const SizedBox(
-                                width: 30,
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    itemController.minCounter();
-                                  });
-                                },
-                                child: const CircleAvatar(
-                                  backgroundColor: AppColors.primary,
-                                  child: Icon(Iconsax.minus),
-                                ),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 35,
-                          ),
-                          SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    "Pesan",
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  )))
-                        ],
-                      ),
-                    );
-                  }).whenComplete(() => itemController.count.value = 1);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: primaryColor, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5), //color of shadow
-                      spreadRadius: 1, //spread radius
-                      blurRadius: 7, // blur radius
-                      offset: Offset(0, 2),
-                    )
-                  ]),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "${listGalon[index]['nama']}",
-                      style: GoogleFonts.boogaloo(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w400,
-                          color: primaryColor),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "${snapshot.data[index]['nama_barang']}",
+                              style: GoogleFonts.boogaloo(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
+                                  color: primaryColor),
+                            ),
+                            Image.asset(
+                              snapshot.data[index]['image'],
+                              width: 100,
+                            ),
+                            Text(
+                              "Rp. ${snapshot.data[index]['harga_barang']}",
+                              style: GoogleFonts.kumbhSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary),
+                            ),
+                            const SizedBox(
+                              height: 3,
+                            ),
+                          ]),
                     ),
-                    Image.asset(
-                      listGalon[index]['image'],
-                      width: 100,
-                    ),
-                    Text(
-                      "${listGalon[index]['harga']}",
-                      style: GoogleFonts.kumbhSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary),
-                    ),
-                    const SizedBox(
-                      height: 3,
-                    ),
-                  ]),
-            ),
-          );
+                  );
+                });
+          }
         });
   }
 }
