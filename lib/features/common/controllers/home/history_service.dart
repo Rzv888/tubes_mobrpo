@@ -1,14 +1,16 @@
-import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
+import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HistoryService {
   final supabase = Supabase.instance.client;
 
   Future<List<Map<String, dynamic>>> getHistory() async {
-    final id = await AuthService().getUserId();
+    final user = await UserService().getCurrentUser();
 
-    final orders =
-        await supabase.from("orders").select().match({'id_pemesan': id});
+    final orders = await supabase
+        .from("orders")
+        .select()
+        .match({'id_pemesan': user['id']});
 
     List<Map<String, dynamic>> history = [];
 
@@ -19,12 +21,7 @@ class HistoryService {
           .eq('id', order['id_barang'])
           .single();
 
-      DateTime createdAt = order['created_at'];
-
       history.add({
-        'purchaseDate': createdAt,
-        'bulan': order['created_at'],
-        'tahun': order['created_at'],
         'id_barang': order['id_barang'],
         'jumlah_barang': order['jumlah_barang'],
         'status': order['status'],
