@@ -4,11 +4,9 @@ import 'package:flutter_tubes_galon/features/common/controllers/home/history_ser
 
 class GalonPurchase {
   final List<Galon> gallons;
-  final DateTime purchaseDate;
 
   GalonPurchase({
     required this.gallons,
-    required this.purchaseDate,
   });
 }
 
@@ -47,26 +45,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
     List<GalonPurchase> purchases = [];
 
     for (var item in historyData) {
-      DateTime purchaseDate = DateTime.parse(item['purchase_date']);
       Galon galon = Galon(
         brand: item['nama_barang'],
         jumlahGalon: item['jumlah_barang'],
         price: item['harga_barang'],
       );
 
-      GalonPurchase purchase = purchases.firstWhere(
-        (p) => p.purchaseDate == purchaseDate,
-        orElse: () => GalonPurchase(
-          gallons: [],
-          purchaseDate: purchaseDate,
-        ),
-      );
-
-      if (purchase.gallons.isEmpty) {
-        purchases.add(purchase);
-      }
-
-      purchase.gallons.add(galon);
+      purchases.add(GalonPurchase(gallons: [galon]));
     }
 
     return purchases;
@@ -89,9 +74,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
             return ListView.builder(
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
+                final purchase = snapshot.data![index];
                 return GestureDetector(
                   onTap: () {
-                    _showPurchaseDetailsDialog(context, snapshot.data![index]);
+                    _showPurchaseDetailsDialog(context, purchase);
                   },
                   child: Card(
                     child: Column(
@@ -101,44 +87,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Rp${_calculateTotalPrice(snapshot.data![index]).toStringAsFixed(3)}',
+                              for (var gallon in purchase.gallons)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              '${gallon.brand} (${gallon.jumlahGalon}) ',
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                        TextSpan(
+                                          text:
+                                              'Rp${(gallon.jumlahGalon * gallon.price).toStringAsFixed(3)}',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          subtitle: Align(
+                            alignment: Alignment.centerRight,
+                            child: GestureDetector(
+                              onTap: () {},
+                              child: Text(
+                                'Beli Lagi',
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ],
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    '${snapshot.data![index].purchaseDate.day.toString().padLeft(2, '0')}-${snapshot.data![index].purchaseDate.month.toString().padLeft(2, '0')}-${snapshot.data![index].purchaseDate.year}',
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    '${snapshot.data![index].purchaseDate.hour.toString().padLeft(2, '0')}:${snapshot.data![index].purchaseDate.minute.toString().padLeft(2, '0')}',
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: GestureDetector(
-                                  onTap: () {},
-                                  child: Text(
-                                    'Beli Lagi',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ],
