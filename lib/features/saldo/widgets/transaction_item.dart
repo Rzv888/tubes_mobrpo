@@ -19,58 +19,73 @@ class TransactionItem extends StatefulWidget {
 
 class _TransactionItemState extends State<TransactionItem> {
   int _saldo = 0;
+
   Future<void> refreshDataUser(context) async {
     final user = await UserService().getCurrentUser();
     print(("cek" + user.toString()));
-    _saldo = user['saldo'].toInt();
+    setState(() {
+      _saldo = user['saldo'].toInt();
+    });
     print("Saldo saat ini" + _saldo.toString());
-    
-
-
-    setState(() {});
   }
+
   @override
   void initState() {
-    refreshDataUser(context);
-    // TODO: implement initState
     super.initState();
+    refreshDataUser(context);
   }
+
   @override
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
-            context: context,
-            builder: (BuildContext ctx) {
-              return Padding(
-                padding: const EdgeInsets.all(AppSizes.md),
-                child: Column(
-                  children: [
-                    Text(
-                      "${widget.transaction.to}  (${widget.transaction.amount})",
-                      style: Theme.of(context).textTheme.headlineSmall,
+          context: context,
+          builder: (BuildContext ctx) {
+            return Padding(
+              padding: const EdgeInsets.all(AppSizes.md),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "${widget.transaction.to}  (${widget.transaction.amount})",
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await UserService().updateSaldo(widget.transaction.amount);
+                        await refreshDataUser(context);
+                        Navigator.of(context).pop();
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Top Up Berhasil"),
+                              content: Text("Saldo berhasil di top up."),
+                              actions: <Widget>[
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text("OK"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: Text("Top Up"),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          UserService().updateSaldo(widget.transaction.amount);
-                        refreshDataUser(context);
-                        },
-                        child: Text("Top Up"),
-                      ),
-                    )
-                  ],
-                ),  
-              );
-            });
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       },
       child: Container(
         margin: const EdgeInsets.all(10),
@@ -104,7 +119,7 @@ class _TransactionItemState extends State<TransactionItem> {
                         .toList()
                         .join(),
                     style: TextStyle(
-                      color: isDark ? AppColors.light : Color(0xFF3D538F),
+                      color: isDark ? AppColors.light : const Color(0xFF3D538F),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -122,18 +137,11 @@ class _TransactionItemState extends State<TransactionItem> {
                       widget.transaction.to,
                       style: TextStyle(
                         fontSize: 15,
-                        color: isDark ? AppColors.light : Color(0xFF3D538F),
+                        color: isDark ? AppColors.light : const Color(0xFF3D538F),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  // Text(
-                  //   transaction.date,
-                  //   style: const TextStyle(
-                  //     color: Color(0xFF3D538F),
-                  //     fontSize: 14,
-                  //   ),
-                  // ),
                 ],
               ),
             ),
@@ -151,13 +159,6 @@ class _TransactionItemState extends State<TransactionItem> {
                     ),
                   ),
                 ),
-                // Text(
-                //   transaction.description,
-                //   style: const TextStyle(
-                //     color: Color(0xFF3D538F),
-                //     fontSize: 12,
-                //   ),
-                // ),
               ],
             ),
           ],
