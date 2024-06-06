@@ -39,10 +39,15 @@ class UserService {
   }
 
   Future<dynamic> getCurrentUser() async {
+  try{
     final email = await AuthService().getUserEmail();
     final user = await supabase.from("users").select().match({'email': email});
     print("nama" + user[0]["nama_lengkap"]);
     return user[0];
+  }catch (e) {
+      print(e);
+      return e.toString();
+    }
   }
 
   Future<void> updateSaldo(int saldo) async {

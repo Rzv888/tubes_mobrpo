@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _xp = 0;
   int currIndex = 0;
   Future<dynamic> refreshDataUser(context) async {
+  try {
     final user = await UserService().getCurrentUser();
     print(("cek" + user.toString()));
     _namalengkap = user["nama_lengkap"];
@@ -38,6 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
     print(_saldo.toString() + "saldo: ");
     setState(() {});
     return user;
+  }catch (e) {
+      print(e);      
+    }
   }
 
   @override
