@@ -16,6 +16,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -28,26 +31,39 @@ class _HomeScreenState extends State<HomeScreen> {
   int _level = 0;
   int _xp = 0;
   int currIndex = 0;
+  File? _image;
+
   Future<dynamic> refreshDataUser(context) async {
-  try {
-    final user = await UserService().getCurrentUser();
-    print(("cek" + user.toString()));
-    _namalengkap = user["nama_lengkap"];
-    _level = user['level'];
-    _xp = user['xp'];
-    _saldo = user['saldo'];
-    print(_saldo.toString() + "saldo: ");
-    setState(() {});
-    return user;
-  }catch (e) {
-      print(e);      
+    try {
+      final user = await UserService().getCurrentUser();
+      print(("cek" + user.toString()));
+      _namalengkap = user["nama_lengkap"];
+      _level = user['level'];
+      _xp = user['xp'];
+      _saldo = user['saldo'];
+      print(_saldo.toString() + "saldo: ");
+      setState(() {});
+      return user;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _loadImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imagePath = prefs.getString('profile_image_path');
+    if (imagePath != null) {
+      setState(() {
+        _image = File(imagePath);
+      });
     }
   }
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     refreshDataUser(context);
+    _loadImage();
   }
 
   @override
@@ -66,10 +82,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () {
                       Get.to(const ProfileScreen());
                     },
-                    child: Image.asset(
-                      "assets/img/profile.png",
-                      width: 70,
-                      height: 70,
+                    child: CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: _image != null
+                          ? FileImage(_image!)
+                          : AssetImage("")
+                              as ImageProvider,
                     ),
                   ),
                   const SizedBox(
@@ -329,7 +348,9 @@ class _ListItemsState extends State<ListItems> {
                                                 snapshot.data[index]['id'],
                                                 itemController.count.value,
                                                 200000, context);
-                                                SnackBar(content: Text("Order Berhasil Dibuat"));
+                                            SnackBar(
+                                                content: Text(
+                                                    "Order Berhasil Dibuat"));
                                           },
                                           child: Text(
                                             "Pesan",
@@ -340,7 +361,8 @@ class _ListItemsState extends State<ListItems> {
                                 ],
                               ),
                             );
-                          }).whenComplete(() => itemController.count.value = 1);
+                          }).whenComplete(() =>
+                              itemController.count.value = 1);
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -349,10 +371,9 @@ class _ListItemsState extends State<ListItems> {
                           border: Border.all(color: primaryColor, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey
-                                  .withOpacity(0.5), //color of shadow
-                              spreadRadius: 1, //spread radius
-                              blurRadius: 7, // blur radius
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 7,
                               offset: Offset(0, 2),
                             )
                           ]),
