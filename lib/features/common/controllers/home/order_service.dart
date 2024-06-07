@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
 import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrderService {
   final supabase = Supabase.instance.client;
 
-  Future<void> updateOrderStatus(String orderId) async {
-    await Future.delayed(Duration(seconds: 1));
-    print("Order status updated for orderId: $orderId");
+  Future<void> updateOrderStatus(String orderId, String status) async {
+    try {
+      final response = await supabase
+          .from('orders')
+          .update({'status': status})
+          .eq('id', orderId);
+      if (response.error != null) {
+        throw response.error!;
+      }
+    } catch (e) {
+      print('Error updating order status: $e');
+    }
   }
 
   Future<void> insertOrder(String productId, int jumlahBarang,
@@ -39,6 +47,9 @@ class OrderService {
     }
     return List<Map<String, dynamic>>.from(response);
   }
+
+  Future<List<Map<String, dynamic>>> getOrdersByUserId(String userId) async {
+    final response = await supabase.from('orders').select().eq('id_pemesan', userId);
+    return List<Map<String, dynamic>>.from(response);
+  }
 }
-
-
