@@ -3,6 +3,7 @@ import 'package:flutter_tubes_galon/features/authentication/controllers/auth_ser
 import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/login/login.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
@@ -32,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     refreshDataUser();
+    _loadImage();
   }
 
   Future<void> refreshDataUser() async {
@@ -48,6 +50,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  Future<void> _loadImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imagePath = prefs.getString('profile_image_path');
+    if (imagePath != null) {
+      setState(() {
+        _image = File(imagePath);
+      });
+    }
+  }
+
+  Future<void> _saveImage(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('profile_image_path', path);
   }
 
   Future<void> _showPicker(BuildContext context) async {
@@ -98,6 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _image = File(image.path);
       });
+      _saveImage(image.path);
     }
   }
 
@@ -111,6 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _image = File(image.path);
       });
+      _saveImage(image.path);
     }
   }
 
@@ -307,10 +326,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ListTile(
                           leading: const Icon(Icons.email, color: Colors.grey),
                           title: Text(_email),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _editField('Email'),
-                          ),
                         ),
                         ListTile(
                           leading: const Icon(Icons.lock, color: Colors.grey),
