@@ -33,21 +33,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     refreshDataUser();
   }
- 
+
   Future<void> refreshDataUser() async {
     try {
-      
-    final user = await UserService().getCurrentUser();
-    if (user != null) {
-      setState(() {
-        _namalengkap = user['nama_lengkap'] as String? ?? '';
-        _address = user['alamat'] as String? ?? '';
-        _phoneNumber = user['no_wa'] as String? ?? '';
-        _email = user['email'] as String? ?? '';
-      });
-    }
+      final user = await UserService().getCurrentUser();
+      if (user != null) {
+        setState(() {
+          _namalengkap = user['nama_lengkap'] as String? ?? '';
+          _address = user['alamat'] as String? ?? '';
+          _phoneNumber = user['no_wa'] as String? ?? '';
+          _email = user['email'] as String? ?? '';
+        });
+      }
     } catch (e) {
-     print(e.toString()); 
+      print(e.toString());
     }
   }
 
@@ -224,136 +223,140 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: const Text('Profile Page'),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      body: SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  _showPicker(context);
-                },
-                child: CircleAvatar(
-                  radius: 55,
-                  backgroundColor: Colors.grey[200],
-                  child: _image != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: Image.file(
-                            _image!,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: <Widget>[
+                GestureDetector(
+                  onTap: () {
+                    _showPicker(context);
+                  },
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.grey[200],
+                    child: _image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.file(
+                              _image!,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(50),
+                            ),
                             width: 100,
                             height: 100,
-                            fit: BoxFit.cover,
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.grey,
+                            ),
                           ),
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          width: 100,
-                          height: 100,
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _namalengkap,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () => _editField('Username'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'User Information',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _namalengkap,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                        const SizedBox(height: 20),
+                        ListTile(
+                          leading: const Icon(Icons.email, color: Colors.grey),
+                          title: Text(_email),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _editField('Email'),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.lock, color: Colors.grey),
+                          title: const Text('*********'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _editField('Password'),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.phone, color: Colors.grey),
+                          title: Text(_phoneNumber),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _editField('Phone Number'),
+                          ),
+                        ),
+                        ListTile(
+                          leading:
+                              const Icon(Icons.location_on, color: Colors.grey),
+                          title: Text(_address),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _editField('Address'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue),
-                    onPressed: () => _editField('Username'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
                 ),
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'User Information',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ListTile(
-                        leading: const Icon(Icons.email, color: Colors.grey),
-                        title: Text(_email),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _editField('Email'),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.lock, color: Colors.grey),
-                        title: const Text('*********'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _editField('Password'),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.phone, color: Colors.grey),
-                        title: Text(_phoneNumber),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _editField('Phone Number'),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.location_on, color: Colors.grey),
-                        title: Text(_address),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _editField('Address'),
-                        ),
-                      ),
-                    ],
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
+                  child: const Text('Logout', style: TextStyle(fontSize: 16)),
                 ),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: _logout,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text('Logout', style: TextStyle(fontSize: 16)),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
