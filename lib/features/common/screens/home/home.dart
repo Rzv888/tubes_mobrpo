@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Colors.grey[200],
                       backgroundImage: _image != null
                           ? FileImage(_image!)
-                          : AssetImage("assets/img/profile.png")
+                          : AssetImage("")
                               as ImageProvider,
                     ),
                   ),
