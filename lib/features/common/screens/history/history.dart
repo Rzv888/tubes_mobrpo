@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tubes_galon/features/common/controllers/home/history_service.dart';
 
-class HistoryPage extends StatefulWidget {
+class HistoryScreen extends StatefulWidget {
   @override
   _HistoryPageState createState() => _HistoryPageState();
 }
