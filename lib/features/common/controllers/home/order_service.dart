@@ -7,7 +7,6 @@ class OrderService {
 
   Future<void> updateOrderStatus(String orderId, String status) async {
     try {
-      print("ke uppdate harusnya");
       final response = await supabase
           .from('orders')
           .update({'status': status}).eq('id', orderId);
@@ -20,7 +19,7 @@ class OrderService {
   }
 
   Future<void> insertOrder(String productId, int jumlahBarang,
-      int totalTransaksi, BuildContext context) async {
+      int totalTransaksi, DateTime waktuPemesanan, BuildContext context) async {
     try {
       final user = await UserService().getCurrentUser();
       await supabase.from('orders').insert({
@@ -28,7 +27,8 @@ class OrderService {
         'id_pemesan': user['id'],
         'jumlah_barang': jumlahBarang,
         'status': 'Dalam Proses',
-        'total_transaksi': totalTransaksi
+        'total_transaksi': totalTransaksi,
+        'created_at': waktuPemesanan.toIso8601String()
       });
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -347,7 +347,7 @@ class _ListItemsState extends State<ListItems> {
                                             OrderService().insertOrder(
                                                 snapshot.data[index]['id'],
                                                 itemController.count.value,
-                                                200000, context);
+                                                200000,DateTime.now(), context);
                                             SnackBar(
                                                 content: Text(
                                                     "Order Berhasil Dibuat"));

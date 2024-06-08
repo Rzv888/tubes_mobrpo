@@ -70,11 +70,9 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  void _updateOrderStatus(BuildContext context, Map<String, dynamic> order) async {
-    await _orderService.updateOrderStatus(order['id'], 'Selesai');
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text('Status pesanan berhasil diubah menjadi Selesai')),
-    // );
+  void _updateOrderStatus(
+      BuildContext context, Map<String, dynamic> order) async {
+    await _orderService.updateOrderStatus(order['id'].toString(), 'Selesai');
     setState(() {
       _dataFuture = _fetchData();
       _selectedOrder = null;
@@ -127,6 +125,9 @@ class _OrderScreenState extends State<OrderScreen> {
                     final product = products.firstWhere(
                         (p) => p['id'] == order['id_barang'],
                         orElse: () => {'nama_barang': 'Unknown', 'image': 'https://via.placeholder.com/150'});
+                    
+                    final orderTime = DateTime.parse(order['created_at']).toLocal();
+                    final formattedOrderTime = "${orderTime.day}-${orderTime.month}-${orderTime.year} ${orderTime.hour}:${orderTime.minute}";
 
                     return Card(
                       child: Column(
@@ -150,26 +151,40 @@ class _OrderScreenState extends State<OrderScreen> {
                               _selectedOrder!['id'] == order['id'])
                             Padding(
                               padding: const EdgeInsets.all(AppSizes.defaultSpace),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Detail Pesanan:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        Text('Barang: ${product['nama_barang']}'),
-                                        Text('Total: ${order['total_transaksi']}'),
-                                        Text('Alamat: ${user['alamat']}'),
-                                        Text('Status: ${order['status']}'),
-                                      ],
+                                  Text('Detail Pesanan:',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  Text('Barang: ${product['nama_barang']}'),
+                                  Text('Jumlah: ${order['jumlah_barang']}'),
+                                  Text('Total: ${order['total_transaksi']}'),
+                                  Text('Alamat: ${user['alamat']}'),
+                                  Text('Waktu Pemesanan: $formattedOrderTime'),
+                                  Text('Status: ${order['status']}'),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _launchWhatsApp(user['no_wa']);
+                                    },
+                                    child: Text(
+                                      'No HP: ${user['no_wa']}',
+                                      style: TextStyle(
+                                          color: Colors.blue,
+                                        ),
                                     ),
                                   ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      _confirmOrderCompletion(context, order);
-                                    },
-                                    child: Text('Selesai'),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _confirmOrderCompletion(context, order);
+                                        },
+                                        child: Text('Selesai'),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
