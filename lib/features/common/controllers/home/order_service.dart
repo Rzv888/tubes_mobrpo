@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tubes_galon/features/authentication/controllers/auth_service.dart';
 import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -40,5 +39,3 @@ class OrderService {
     return List<Map<String, dynamic>>.from(response);
   }
 }
-
-
