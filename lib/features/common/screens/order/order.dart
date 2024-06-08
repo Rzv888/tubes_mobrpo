@@ -4,7 +4,8 @@ import 'package:flutter_tubes_galon/features/authentication/controllers/user_ser
 import 'package:flutter_tubes_galon/features/common/controllers/home/product_service.dart';
 import 'package:flutter_tubes_galon/features/common/controllers/home/order_service.dart';
 import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 class OrderScreen extends StatefulWidget {
   @override
@@ -35,7 +36,7 @@ class _OrderScreenState extends State<OrderScreen> {
   void _showOrderDetails(Map<String, dynamic> order) {
     setState(() {
       if (_selectedOrder != null && _selectedOrder!['id'] == order['id']) {
-        _selectedOrder = null; 
+        _selectedOrder = null;
       } else {
         _selectedOrder = order;
       }
@@ -124,10 +125,10 @@ class _OrderScreenState extends State<OrderScreen> {
                     final order = filteredOrders[index];
                     final product = products.firstWhere(
                         (p) => p['id'] == order['id_barang'],
-                        orElse: () => {'nama_barang': 'Unknown', 'image': 'https://via.placeholder.com/150'});
-                    
-                    final orderTime = DateTime.parse(order['created_at']).toLocal();
-                    final formattedOrderTime = "${orderTime.day}-${orderTime.month}-${orderTime.year} ${orderTime.hour}:${orderTime.minute}";
+                        orElse: () => {
+                              'nama_barang': 'Unknown',
+                              'image': 'https://via.placeholder.com/150'
+                            });
 
                     return Card(
                       child: Column(
@@ -150,7 +151,8 @@ class _OrderScreenState extends State<OrderScreen> {
                           if (_selectedOrder != null &&
                               _selectedOrder!['id'] == order['id'])
                             Padding(
-                              padding: const EdgeInsets.all(AppSizes.defaultSpace),
+                              padding:
+                                  const EdgeInsets.all(AppSizes.defaultSpace),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -161,7 +163,8 @@ class _OrderScreenState extends State<OrderScreen> {
                                   Text('Jumlah: ${order['jumlah_barang']}'),
                                   Text('Total: ${order['total_transaksi']}'),
                                   Text('Alamat: ${user['alamat']}'),
-                                  Text('Waktu Pemesanan: $formattedOrderTime'),
+                                  Text(
+                                      'Waktu Pemesanan : ${DateFormat('d MMMM y - HH:mm').format(DateTime.parse(order['created_at']))}'),
                                   Text('Status: ${order['status']}'),
                                   GestureDetector(
                                     onTap: () {
@@ -170,8 +173,8 @@ class _OrderScreenState extends State<OrderScreen> {
                                     child: Text(
                                       'No HP: ${user['no_wa']}',
                                       style: TextStyle(
-                                          color: Colors.blue,
-                                        ),
+                                        color: Colors.blue,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(height: 10),
@@ -180,7 +183,8 @@ class _OrderScreenState extends State<OrderScreen> {
                                     children: [
                                       ElevatedButton(
                                         onPressed: () {
-                                          _confirmOrderCompletion(context, order);
+                                          _confirmOrderCompletion(
+                                              context, order);
                                         },
                                         child: Text('Selesai'),
                                       ),
