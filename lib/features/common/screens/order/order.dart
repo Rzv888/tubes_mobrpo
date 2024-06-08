@@ -6,6 +6,7 @@ import 'package:flutter_tubes_galon/features/common/controllers/home/order_servi
 import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class OrderScreen extends StatefulWidget {
   @override
@@ -16,6 +17,8 @@ class _OrderScreenState extends State<OrderScreen> {
   final OrderService _orderService = OrderService();
   final ProductService _productService = ProductService();
   final UserService _userService = UserService();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   late Future<List<dynamic>> _dataFuture;
   Map<String, dynamic>? _selectedOrder;
@@ -24,6 +27,28 @@ class _OrderScreenState extends State<OrderScreen> {
   void initState() {
     super.initState();
     _dataFuture = _fetchData();
+    final androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    final initSettings =
+        InitializationSettings(android: androidInit);
+    flutterLocalNotificationsPlugin.initialize(initSettings);
+  }
+  Future<void> _showNotification(String title, String body) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'channel_id',
+      'channel_name',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
   }
 
   Future<List<dynamic>> _fetchData() async {
@@ -78,11 +103,13 @@ class _OrderScreenState extends State<OrderScreen> {
       _dataFuture = _fetchData();
       _selectedOrder = null;
     });
+
+    _showNotification('Pesanan Selesai', 'Terima kasih telah melakukan Pemesanan!');
   }
 
   Future<void> _launchWhatsApp(String phoneNumber) async {
     final url = Uri.parse('https://wa.me/$phoneNumber');
-     try {
+    try {
       await launchUrl(url);
     } catch (e) {
       throw 'Could not launch $url';
@@ -137,14 +164,7 @@ class _OrderScreenState extends State<OrderScreen> {
                             onTap: () {
                               _showOrderDetails(order);
                             },
-                            leading:
-                                // ? Image.network(
-                                //     product['image'],
-                                //     width: 50,
-                                //     height: 50,
-                                //     fit: BoxFit.cover,
-                                //   )
-                                Icon(Icons.water),
+                            leading: Icon(Icons.water),
                             title: Text('${product['nama_barang']}'),
                             subtitle: Text(
                                 'Total: ${order['jumlah_barang'] * order['total_transaksi']} \nAlamat: ${user['alamat']}'),
