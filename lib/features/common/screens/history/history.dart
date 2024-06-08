@@ -6,7 +6,7 @@ class HistoryScreen extends StatefulWidget {
   _HistoryPageState createState() => _HistoryPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class _HistoryPageState extends State<HistoryScreen> {
   Future<List<Map<String, dynamic>>>? _historyFuture;
 
   @override
