@@ -81,10 +81,10 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   Future<void> _launchWhatsApp(String phoneNumber) async {
-    final url = 'https://wa.me/$phoneNumber';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
+    final url = Uri.parse('https://wa.me/$phoneNumber');
+     try {
+      await launchUrl(url);
+    } catch (e) {
       throw 'Could not launch $url';
     }
   }
