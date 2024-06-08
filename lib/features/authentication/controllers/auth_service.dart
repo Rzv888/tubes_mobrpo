@@ -12,6 +12,7 @@ class AuthService {
       final AuthResponse res = await supabase.auth
           .signInWithPassword(email: email, password: password);
       final User? user = res.user;
+      final Session? session = res.session;
       print(user.toString());
       if (user != null) {
         Navigator.pushAndRemoveUntil(
@@ -130,81 +131,69 @@ default""";
     }
   }
 
-Future<void> editName(BuildContext context, String new_name) async{
-  try{
-    final email_user = await getUserEmail(); 
-  await supabase
-  .from('users')
-  .update({ 'nama_lengkap': new_name })
-  .match({ 'email': email_user  });
-  }
-  catch(e){
-    print(e);
-  }
-}
-
-
-Future<void> editEmail(BuildContext context, String new_email) async {
-  try {
-    final email_user = await getUserEmail();
-     final response = await supabase
-      .from('users')
-      .update({ 'email': new_email })
-      .match({ 'email': email_user });
-    
-    final UserResponse res = await supabase.auth.updateUser(
-      UserAttributes(
-        email: new_email,
-      ),
-    );
-    print("user baru" + res.user.toString());
-
-   
-
-    if (response.error != null) {
-      throw Exception("Failed to update email in public schema: ${response.error!.message}");
+  Future<void> editName(BuildContext context, String new_name) async {
+    try {
+      final email_user = await getUserEmail();
+      await supabase
+          .from('users')
+          .update({'nama_lengkap': new_name}).match({'email': email_user});
+    } catch (e) {
+      print(e);
     }
-  } catch (e) {
-    
-  } 
-}
+  }
 
-Future<void> editPassword(BuildContext context, String new_password) async{
-  try{
-    final UserResponse res = await supabase.auth.updateUser(
-  UserAttributes(
-    password: new_password,
-  ),
-);
-  }
-  catch(e){
-    print(e);
-  }
-}
+  Future<void> editEmail(BuildContext context, String new_email) async {
+    try {
+      final email_user = await getUserEmail();
+      final response = await supabase
+          .from('users')
+          .update({'email': new_email}).match({'email': email_user});
 
-Future<void> editWa(BuildContext context, String new_wa) async{
-  try{
-    final email_user = await getUserEmail(); 
-  await supabase
-  .from('users')
-  .update({ 'no_wa': new_wa })
-  .match({ 'email': email_user  });
-  }
-  catch(e){
-    print(e);
-  }
-}
+      final UserResponse res = await supabase.auth.updateUser(
+        UserAttributes(
+          email: new_email,
+        ),
+      );
+      print("user baru" + res.user.toString());
 
-Future<void> editAlamat(BuildContext context, String new_alamat) async{
-  try{
-    final email_user = await getUserEmail(); 
-  await supabase
-  .from('users')
-  .update({ 'alamat': new_alamat })
-  .match({ 'email': email_user  });
+      if (response.error != null) {
+        throw Exception(
+            "Failed to update email in public schema: ${response.error!.message}");
+      }
+    } catch (e) {}
   }
-  catch(e){
-    print(e);
+
+  Future<void> editPassword(BuildContext context, String new_password) async {
+    try {
+      final UserResponse res = await supabase.auth.updateUser(
+        UserAttributes(
+          password: new_password,
+        ),
+      );
+    } catch (e) {
+      print(e);
+    }
   }
-}
+
+  Future<void> editWa(BuildContext context, String new_wa) async {
+    try {
+      final email_user = await getUserEmail();
+      await supabase
+          .from('users')
+          .update({'no_wa': new_wa}).match({'email': email_user});
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> editAlamat(BuildContext context, String new_alamat) async {
+    try {
+      final email_user = await getUserEmail();
+      await supabase
+          .from('users')
+          .update({'alamat': new_alamat}).match({'email': email_user});
+    } catch (e) {
+      print(e);
+    }
+  }
 }
