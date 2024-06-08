@@ -41,7 +41,8 @@ class _OrderScreenState extends State<OrderScreen> {
     });
   }
 
-  void _confirmOrderCompletion(BuildContext context, Map<String, dynamic> order) {
+  void _confirmOrderCompletion(
+      BuildContext context, Map<String, dynamic> order) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -51,14 +52,14 @@ class _OrderScreenState extends State<OrderScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
               child: Text('Tidak'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
                 _updateOrderStatus(context, order);
+                Navigator.of(context).pop();
               },
               child: Text('Ya'),
             ),
@@ -68,11 +69,12 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  void _updateOrderStatus(BuildContext context, Map<String, dynamic> order) async {
-    await _orderService.updateOrderStatus(order['id'], 'Selesai');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Status pesanan berhasil diubah menjadi Selesai')),
-    );
+  void _updateOrderStatus(
+      BuildContext context, Map<String, dynamic> order) async {
+    await _orderService.updateOrderStatus(order['id'].toString(), 'Selesai');
+    // ScaffoldMessenger.of(context).showSnackBar(
+    // SnackBar(content: Text('Status pesanan berhasil diubah menjadi Selesai')),
+    // );
     setState(() {
       _dataFuture = _fetchData();
       _selectedOrder = null;
@@ -129,19 +131,27 @@ class _OrderScreenState extends State<OrderScreen> {
                                 'Total: ${order['total_transaksi']} \nAlamat: ${user['alamat']}'),
                             trailing: Text('${order['status']}'),
                           ),
-                          if (_selectedOrder != null && _selectedOrder!['id'] == order['id'])
+                          if (_selectedOrder != null &&
+                              _selectedOrder!['id'] == order['id'])
                             Padding(
-                              padding: const EdgeInsets.all(AppSizes.defaultSpace),
+                              padding:
+                                  const EdgeInsets.all(AppSizes.defaultSpace),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text('Detail Pesanan:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        Text('Barang: ${product['nama_barang']}'),
-                                        Text('Total: ${order['total_transaksi']}'),
+                                        Text('Detail Pesanan:',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        Text(
+                                            'Barang: ${product['nama_barang']}'),
+                                        Text(
+                                            'Total: ${order['total_transaksi']}'),
                                         Text('Alamat: ${user['alamat']}'),
                                         Text('Status: ${order['status']}'),
                                       ],

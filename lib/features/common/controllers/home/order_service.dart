@@ -7,10 +7,10 @@ class OrderService {
 
   Future<void> updateOrderStatus(String orderId, String status) async {
     try {
+      print("ke uppdate harusnya");
       final response = await supabase
           .from('orders')
-          .update({'status': status})
-          .eq('id', orderId);
+          .update({'status': status}).eq('id', orderId);
       if (response.error != null) {
         throw response.error!;
       }
@@ -49,7 +49,8 @@ class OrderService {
   }
 
   Future<List<Map<String, dynamic>>> getOrdersByUserId(String userId) async {
-    final response = await supabase.from('orders').select().eq('id_pemesan', userId);
+    final response =
+        await supabase.from('orders').select().eq('id_pemesan', userId);
     return List<Map<String, dynamic>>.from(response);
   }
 }
