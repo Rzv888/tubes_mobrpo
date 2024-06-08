@@ -70,9 +70,11 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  void _updateOrderStatus(
-      BuildContext context, Map<String, dynamic> order) async {
-    await _orderService.updateOrderStatus(order['id'].toString(), 'Selesai');
+  void _updateOrderStatus(BuildContext context, Map<String, dynamic> order) async {
+    await _orderService.updateOrderStatus(order['id'], 'Selesai');
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('Status pesanan berhasil diubah menjadi Selesai')),
+    // );
     setState(() {
       _dataFuture = _fetchData();
       _selectedOrder = null;
@@ -148,39 +150,26 @@ class _OrderScreenState extends State<OrderScreen> {
                               _selectedOrder!['id'] == order['id'])
                             Padding(
                               padding: const EdgeInsets.all(AppSizes.defaultSpace),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Detail Pesanan:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  Text('Barang: ${product['nama_barang']}'),
-                                  Text('Jumlah: ${order['jumlah_barang']}'),
-                                  Text('Total: ${order['total_transaksi']}'),
-                                  Text('Alamat: ${user['alamat']}'),
-                                  Text('Status: ${order['status']}'),
-                                  GestureDetector(
-                                    onTap: () {
-                                      _launchWhatsApp(user['no_wa']);
-                                    },
-                                    child: Text(
-                                      'No HP: ${user['no_wa']}',
-                                      style: TextStyle(
-                                          color: Colors.blue,
-                                          ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Detail Pesanan:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        Text('Barang: ${product['nama_barang']}'),
+                                        Text('Total: ${order['total_transaksi']}'),
+                                        Text('Alamat: ${user['alamat']}'),
+                                        Text('Status: ${order['status']}'),
+                                      ],
                                     ),
                                   ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          _confirmOrderCompletion(context, order);
-                                        },
-                                        child: Text('Selesai'),
-                                      ),
-                                    ],
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _confirmOrderCompletion(context, order);
+                                    },
+                                    child: Text('Selesai'),
                                   ),
                                 ],
                               ),
