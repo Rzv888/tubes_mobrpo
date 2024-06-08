@@ -2,35 +2,38 @@ import 'package:flutter_tubes_galon/features/authentication/controllers/user_ser
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HistoryService {
-  final supabase = Supabase.instance.client;
-
   Future<List<Map<String, dynamic>>> getHistory() async {
-    final user = await UserService().getCurrentUser();
+    try {
+      final supabase = Supabase.instance.client;
+      final user = await UserService().getCurrentUser();
+      print('User: $user'); // Print nilai user
 
-    final orders = await supabase
-        .from("orders")
-        .select()
-        .match({'id_pemesan': user['id']});
+      final ordersResponse = await supabase
+          .from("orders")
+          .select('id_barang, jumlah_barang, total_transaksi, status')
+          .match({'id_pemesan': user['id']}).eq('status', 'Selesai');
+      print('Orders Response: $ordersResponse'); // Print nilai ordersResponse
 
-    List<Map<String, dynamic>> history = [];
+      final orders = List<Map<String, dynamic>>.from(ordersResponse);
 
-    for (var order in orders) {
-      final product = await supabase
-          .from("products")
-          .select()
-          .eq('id', order['id_barang'])
-          .single();
+      for (final order in orders) {
+        final productId = order['id_barang'];
+        final productResponse = await supabase
+            .from('products')
+            .select('id, nama_barang, harga_barang')
+            .eq('id', productId)
+            .single();
+        print(
+            'Product Response: $productResponse'); // Print nilai productResponse
 
-      history.add({
-        'id_barang': order['id_barang'],
-        'jumlah_barang': order['jumlah_barang'],
-        'status': order['status'],
-        'total_transaksi': order['total_transaksi'],
-        'nama_barang': product['nama_barang'],
-        'harga_barang': product['harga_barang'],
-      });
+        final product = productResponse;
+        order['product'] = product;
+      }
+
+      return orders;
+    } catch (error) {
+      print('Error in getHistory: $error');
+      throw Exception('Internal Server Error');
     }
-
-    return history;
   }
 }
