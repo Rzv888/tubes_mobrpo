@@ -4,6 +4,7 @@ import 'package:flutter_tubes_galon/features/authentication/controllers/user_ser
 import 'package:flutter_tubes_galon/features/common/controllers/home/product_service.dart';
 import 'package:flutter_tubes_galon/features/common/controllers/home/order_service.dart';
 import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 
 class OrderScreen extends StatefulWidget {
   @override
@@ -34,14 +35,15 @@ class _OrderScreenState extends State<OrderScreen> {
   void _showOrderDetails(Map<String, dynamic> order) {
     setState(() {
       if (_selectedOrder != null && _selectedOrder!['id'] == order['id']) {
-        _selectedOrder = null; // Deselect if the same order is tapped again
+        _selectedOrder = null; 
       } else {
         _selectedOrder = order;
       }
     });
   }
 
-  void _confirmOrderCompletion(BuildContext context, Map<String, dynamic> order) {
+  void _confirmOrderCompletion(
+      BuildContext context, Map<String, dynamic> order) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -51,14 +53,14 @@ class _OrderScreenState extends State<OrderScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
               child: Text('Tidak'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
                 _updateOrderStatus(context, order);
+                Navigator.of(context).pop();
               },
               child: Text('Ya'),
             ),
@@ -68,15 +70,22 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  void _updateOrderStatus(BuildContext context, Map<String, dynamic> order) async {
-    await _orderService.updateOrderStatus(order['id'], 'Selesai');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Status pesanan berhasil diubah menjadi Selesai')),
-    );
+  void _updateOrderStatus(
+      BuildContext context, Map<String, dynamic> order) async {
+    await _orderService.updateOrderStatus(order['id'].toString(), 'Selesai');
     setState(() {
       _dataFuture = _fetchData();
       _selectedOrder = null;
     });
+  }
+
+  Future<void> _launchWhatsApp(String phoneNumber) async {
+    final url = 'https://wa.me/$phoneNumber';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
@@ -115,7 +124,7 @@ class _OrderScreenState extends State<OrderScreen> {
                     final order = filteredOrders[index];
                     final product = products.firstWhere(
                         (p) => p['id'] == order['id_barang'],
-                        orElse: () => {'nama_barang': 'Unknown'});
+                        orElse: () => {'nama_barang': 'Unknown', 'image': 'https://via.placeholder.com/150'});
 
                     return Card(
                       child: Column(
@@ -124,34 +133,54 @@ class _OrderScreenState extends State<OrderScreen> {
                             onTap: () {
                               _showOrderDetails(order);
                             },
+                            leading: Image.network(
+                              product['image'],
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                            ),
                             title: Text('${product['nama_barang']}'),
                             subtitle: Text(
                                 'Total: ${order['total_transaksi']} \nAlamat: ${user['alamat']}'),
                             trailing: Text('${order['status']}'),
                           ),
-                          if (_selectedOrder != null && _selectedOrder!['id'] == order['id'])
+                          if (_selectedOrder != null &&
+                              _selectedOrder!['id'] == order['id'])
                             Padding(
                               padding: const EdgeInsets.all(AppSizes.defaultSpace),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Detail Pesanan:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        Text('Barang: ${product['nama_barang']}'),
-                                        Text('Total: ${order['total_transaksi']}'),
-                                        Text('Alamat: ${user['alamat']}'),
-                                        Text('Status: ${order['status']}'),
-                                      ],
+                                  Text('Detail Pesanan:',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  Text('Barang: ${product['nama_barang']}'),
+                                  Text('Jumlah: ${order['jumlah_barang']}'),
+                                  Text('Total: ${order['total_transaksi']}'),
+                                  Text('Alamat: ${user['alamat']}'),
+                                  Text('Status: ${order['status']}'),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _launchWhatsApp(user['no_wa']);
+                                    },
+                                    child: Text(
+                                      'No HP: ${user['no_wa']}',
+                                      style: TextStyle(
+                                          color: Colors.blue,
+                                          ),
                                     ),
                                   ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      _confirmOrderCompletion(context, order);
-                                    },
-                                    child: Text('Selesai'),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _confirmOrderCompletion(context, order);
+                                        },
+                                        child: Text('Selesai'),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
