@@ -3,6 +3,7 @@ import 'package:flutter_tubes_galon/features/authentication/screens/login/login.
 import 'package:flutter_tubes_galon/features/authentication/screens/onboarding/widgets/onboarding_page.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/register/register.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/onboarding/onboarding.dart';
+import 'package:flutter_tubes_galon/features/common/screens/home/home.dart';
 import 'package:flutter_tubes_galon/utils/theme/theme.dart';
 import 'package:get/get.dart';
 
@@ -28,6 +29,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int currIndex = 0;
+  Session? session = Supabase.instance.client.auth.currentSession;
 
   PageController pageController = PageController();
   // This widget is the root of your application.
@@ -35,6 +37,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    print("session: " + session.toString());
   }
 
   @override
@@ -44,6 +47,6 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        home: const OnboardingScreen());
+        home: session != null ? HomeScreen() : const OnboardingScreen());
   }
 }
