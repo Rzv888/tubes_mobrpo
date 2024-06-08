@@ -1,9 +1,6 @@
-import 'dart:ffi';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_tubes_galon/data/list_galon.dart';
 import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/features/common/controllers/home/AddItemController.dart';
 import 'package:flutter_tubes_galon/features/common/controllers/home/order_service.dart';
@@ -15,10 +12,8 @@ import 'package:flutter_tubes_galon/utils/constants/colors.dart';
 import 'package:flutter_tubes_galon/utils/constants/sizes.dart';
 import 'package:flutter_tubes_galon/utils/helpers/helper_functions.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
@@ -73,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     refreshDataUser(context);
     _loadImage();
+    setState(() {});
   }
 
   @override
@@ -84,182 +80,186 @@ class _HomeScreenState extends State<HomeScreen> {
           refreshDataUser(context);
         });
       },
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: ListView(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        Get.to(const ProfileScreen());
-                      },
-                      child: CircleAvatar(
-                        radius: 35,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: _image != null
-                            ? FileImage(_image!)
-                            : AssetImage("") as ImageProvider,
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Selamat Datang",
-                          style: GoogleFonts.kumbhSans(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: greyColor),
-                        ),
-                        Text(
-                          _namalengkap,
-                          style: GoogleFonts.kumbhSans(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
-                              color: primaryColor),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                Stack(
-                  alignment: Alignment.topRight,
-                  children: [
-                    const Icon(
-                      Icons.notifications,
-                      color: primaryColor,
-                      size: 40,
-                    ),
-                    Container(
-                      width: 15,
-                      height: 15,
-                      decoration: const BoxDecoration(
-                          color: redColor, shape: BoxShape.circle),
-                      child: Center(
-                          child: Text(
-                        "1",
-                        style: GoogleFonts.inter(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      )),
-                    )
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Container(
-              padding: const EdgeInsets.all(15),
-              decoration: const BoxDecoration(
-                  color: primaryColor,
-                  borderRadius: BorderRadius.all(Radius.circular(15))),
-              child: Center(
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Get.to(const SaldoScreen());
-                      },
-                      child: Container(
-                          padding: const EdgeInsets.all(15),
-                          decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20))),
-                          child: Row(
+      child: FutureBuilder(
+          future: refreshDataUser(context),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: ListView(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Get.to(const ProfileScreen());
+                            },
+                            child: CircleAvatar(
+                              radius: 35,
+                              backgroundColor: Colors.grey[200],
+                              backgroundImage: _image != null
+                                  ? FileImage(_image!)
+                                  : AssetImage("") as ImageProvider,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Image.asset(
-                                "assets/img/wallet.png",
-                                width: 35,
+                              Text(
+                                "Selamat Datang",
+                                style: GoogleFonts.kumbhSans(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: greyColor),
                               ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Saldo",
-                                    style: GoogleFonts.boogaloo(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.dark),
-                                  ),
-                                  FutureBuilder(
-                                      future: refreshDataUser(context),
-                                      builder: (context, snapshot) {
-                                        return Text(
+                              Text(
+                                _namalengkap,
+                                style: GoogleFonts.kumbhSans(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.w700,
+                                    color: primaryColor),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                      Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          const Icon(
+                            Icons.notifications,
+                            color: primaryColor,
+                            size: 40,
+                          ),
+                          Container(
+                            width: 15,
+                            height: 15,
+                            decoration: const BoxDecoration(
+                                color: redColor, shape: BoxShape.circle),
+                            child: Center(
+                                child: Text(
+                              "1",
+                              style: GoogleFonts.inter(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            )),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: const BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(15))),
+                    child: Center(
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Get.to(const SaldoScreen());
+                            },
+                            child: Container(
+                                padding: const EdgeInsets.all(15),
+                                decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20))),
+                                child: Row(
+                                  children: [
+                                    Image.asset(
+                                      "assets/img/wallet.png",
+                                      width: 35,
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Saldo",
+                                          style: GoogleFonts.boogaloo(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.dark),
+                                        ),
+                                        Text(
                                           "Rp. " + _saldo.toString(),
                                           style: GoogleFonts.boogaloo(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w700,
                                               color: AppColors.dark),
-                                        );
-                                      })
-                                ],
-                              )
-                            ],
-                          )),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Level " + _level.toString(),
-                            style: GoogleFonts.boogaloo(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white),
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                )),
                           ),
-                          Container(
-                            child: LinearProgressIndicator(
-                              value: _xp / 200,
-                            ),
-                            height: 10,
-                            width: 100,
-                            decoration: const BoxDecoration(
-                                color: Color(0xffF3EDED),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10))),
+                          const SizedBox(
+                            width: 10,
                           ),
-                          Text(
-                            _xp.toString() + "/200",
-                            style: GoogleFonts.boogaloo(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white),
-                          )
-                        ])
-                  ],
-                ),
+                          Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Level " + _level.toString(),
+                                  style: GoogleFonts.boogaloo(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white),
+                                ),
+                                Container(
+                                  child: LinearProgressIndicator(
+                                    value: _xp / 200,
+                                  ),
+                                  height: 10,
+                                  width: 100,
+                                  decoration: const BoxDecoration(
+                                      color: Color(0xffF3EDED),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10))),
+                                ),
+                                Text(
+                                  _xp.toString() + "/200",
+                                  style: GoogleFonts.boogaloo(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white),
+                                )
+                              ])
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  ListItems(),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(
-              height: 40,
-            ),
-            ListItems(),
-            const SizedBox(
-              height: 20,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-          ],
-        ),
-      ),
+            );
+          }),
     );
   }
 }
