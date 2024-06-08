@@ -4,6 +4,7 @@ import 'package:flutter_tubes_galon/features/authentication/screens/onboarding/w
 import 'package:flutter_tubes_galon/features/authentication/screens/register/register.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/onboarding/onboarding.dart';
 import 'package:flutter_tubes_galon/features/common/screens/home/home.dart';
+import 'package:flutter_tubes_galon/main_menu.dart';
 import 'package:flutter_tubes_galon/utils/theme/theme.dart';
 import 'package:get/get.dart';
 
@@ -47,6 +48,6 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        home: session != null ? HomeScreen() : const OnboardingScreen());
+        home: session != null ? MainMenu() : const OnboardingScreen());
   }
 }
