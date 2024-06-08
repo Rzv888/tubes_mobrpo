@@ -147,7 +147,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                 Icon(Icons.water),
                             title: Text('${product['nama_barang']}'),
                             subtitle: Text(
-                                'Total: ${order['total_transaksi']} \nAlamat: ${user['alamat']}'),
+                                'Total: ${order['jumlah_barang'] * order['total_transaksi']} \nAlamat: ${user['alamat']}'),
                             trailing: Text('${order['status']}'),
                           ),
                           if (_selectedOrder != null &&
@@ -163,7 +163,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                           fontWeight: FontWeight.bold)),
                                   Text('Barang: ${product['nama_barang']}'),
                                   Text('Jumlah: ${order['jumlah_barang']}'),
-                                  Text('Total: ${order['total_transaksi']}'),
+                                  Text('Total: ${order['jumlah_barang'] * order['total_transaksi']}'),
                                   Text('Alamat: ${user['alamat']}'),
                                   Text(
                                       'Waktu Pemesanan : ${DateFormat('d MMMM y - HH:mm').format(DateTime.parse(order['created_at']))}'),
