@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -20,6 +22,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -38,11 +42,16 @@ class _HomeScreenState extends State<HomeScreen> {
       final user = await UserService().getCurrentUser();
       print(("cek" + user.toString()));
       _namalengkap = user["nama_lengkap"];
-      _level = user['level'];
       _xp = user['xp'];
+      if (_xp >= 200) {
+        UserService().setXP(_xp - 200);
+        UserService().addLevel();
+        setState(() {});
+      }
+      _level = user['level'];
       _saldo = user['saldo'];
       print(_saldo.toString() + "saldo: ");
-      setState(() {});
+      // setState(() {});
       return user;
     } catch (e) {
       print(e);
@@ -69,178 +78,187 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: ListView(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Get.to(const ProfileScreen());
-                    },
-                    child: CircleAvatar(
-                      radius: 35,
-                      backgroundColor: Colors.grey[200],
-                      backgroundImage: _image != null
-                          ? FileImage(_image!)
-                          : AssetImage("")
-                              as ImageProvider,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Selamat Datang",
-                        style: GoogleFonts.kumbhSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: greyColor),
+    return RefreshIndicator(
+      onRefresh: () async {
+        setState(() {
+          refreshDataUser(context);
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Get.to(const ProfileScreen());
+                      },
+                      child: CircleAvatar(
+                        radius: 35,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: _image != null
+                            ? FileImage(_image!)
+                            : AssetImage("") as ImageProvider,
                       ),
-                      Text(
-                        _namalengkap,
-                        style: GoogleFonts.kumbhSans(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w700,
-                            color: primaryColor),
-                      )
-                    ],
-                  ),
-                ],
-              ),
-              Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  const Icon(
-                    Icons.notifications,
-                    color: primaryColor,
-                    size: 40,
-                  ),
-                  Container(
-                    width: 15,
-                    height: 15,
-                    decoration: const BoxDecoration(
-                        color: redColor, shape: BoxShape.circle),
-                    child: Center(
-                        child: Text(
-                      "1",
-                      style: GoogleFonts.inter(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    )),
-                  )
-                ],
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: const BoxDecoration(
-                color: primaryColor,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Center(
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(const SaldoScreen());
-                    },
-                    child: Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(20))),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              "assets/img/wallet.png",
-                              width: 35,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Saldo",
-                                  style: GoogleFonts.boogaloo(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.dark),
-                                ),
-                                FutureBuilder(
-                                    future: refreshDataUser(context),
-                                    builder: (context, snapshot) {
-                                      return Text(
-                                        "Rp. " + _saldo.toString(),
-                                        style: GoogleFonts.boogaloo(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.dark),
-                                      );
-                                    })
-                              ],
-                            )
-                          ],
-                        )),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Column(
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Level " + _level.toString(),
-                          style: GoogleFonts.boogaloo(
+                          "Selamat Datang",
+                          style: GoogleFonts.kumbhSans(
                               fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white),
-                        ),
-                        Container(
-                          height: 10,
-                          width: 100,
-                          decoration: const BoxDecoration(
-                              color: Color(0xffF3EDED),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
+                              fontWeight: FontWeight.w600,
+                              color: greyColor),
                         ),
                         Text(
-                          _xp.toString() + "/200",
-                          style: GoogleFonts.boogaloo(
-                              fontSize: 15,
+                          _namalengkap,
+                          style: GoogleFonts.kumbhSans(
+                              fontSize: 25,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white),
+                              color: primaryColor),
                         )
-                      ])
-                ],
+                      ],
+                    ),
+                  ],
+                ),
+                Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    const Icon(
+                      Icons.notifications,
+                      color: primaryColor,
+                      size: 40,
+                    ),
+                    Container(
+                      width: 15,
+                      height: 15,
+                      decoration: const BoxDecoration(
+                          color: redColor, shape: BoxShape.circle),
+                      child: Center(
+                          child: Text(
+                        "1",
+                        style: GoogleFonts.inter(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      )),
+                    )
+                  ],
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: const BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Center(
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(const SaldoScreen());
+                      },
+                      child: Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(20))),
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                "assets/img/wallet.png",
+                                width: 35,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Saldo",
+                                    style: GoogleFonts.boogaloo(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.dark),
+                                  ),
+                                  FutureBuilder(
+                                      future: refreshDataUser(context),
+                                      builder: (context, snapshot) {
+                                        return Text(
+                                          "Rp. " + _saldo.toString(),
+                                          style: GoogleFonts.boogaloo(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.dark),
+                                        );
+                                      })
+                                ],
+                              )
+                            ],
+                          )),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Level " + _level.toString(),
+                            style: GoogleFonts.boogaloo(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
+                          ),
+                          Container(
+                            child: LinearProgressIndicator(
+                              value: _xp / 200,
+                            ),
+                            height: 10,
+                            width: 100,
+                            decoration: const BoxDecoration(
+                                color: Color(0xffF3EDED),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10))),
+                          ),
+                          Text(
+                            _xp.toString() + "/200",
+                            style: GoogleFonts.boogaloo(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
+                          )
+                        ])
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 40,
-          ),
-          ListItems(),
-          const SizedBox(
-            height: 20,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-        ],
+            const SizedBox(
+              height: 40,
+            ),
+            ListItems(),
+            const SizedBox(
+              height: 20,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -347,10 +365,15 @@ class _ListItemsState extends State<ListItems> {
                                             OrderService().insertOrder(
                                                 snapshot.data[index]['id'],
                                                 itemController.count.value,
-                                                200000,DateTime.now(), context);
+                                                (snapshot.data[index]
+                                                    ['harga_barang']),
+                                                DateTime.now(),
+                                                context);
                                             SnackBar(
                                                 content: Text(
                                                     "Order Berhasil Dibuat"));
+
+                                            setState(() {});
                                           },
                                           child: Text(
                                             "Pesan",
@@ -361,8 +384,7 @@ class _ListItemsState extends State<ListItems> {
                                 ],
                               ),
                             );
-                          }).whenComplete(() =>
-                              itemController.count.value = 1);
+                          }).whenComplete(() => itemController.count.value = 1);
                     },
                     child: Container(
                       decoration: BoxDecoration(

@@ -57,7 +57,8 @@ class _TransactionItemState extends State<TransactionItem> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        await UserService().updateSaldo(widget.transaction.amount);
+                        await UserService()
+                            .updateSaldo(widget.transaction.amount);
                         await refreshDataUser(context);
                         Navigator.of(context).pop();
                         showDialog(
@@ -69,6 +70,7 @@ class _TransactionItemState extends State<TransactionItem> {
                               actions: <Widget>[
                                 ElevatedButton(
                                   onPressed: () {
+                                    setState(() {});
                                     Navigator.of(context).pop();
                                   },
                                   child: Text("OK"),
@@ -137,7 +139,8 @@ class _TransactionItemState extends State<TransactionItem> {
                       widget.transaction.to,
                       style: TextStyle(
                         fontSize: 15,
-                        color: isDark ? AppColors.light : const Color(0xFF3D538F),
+                        color:
+                            isDark ? AppColors.light : const Color(0xFF3D538F),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -151,7 +154,7 @@ class _TransactionItemState extends State<TransactionItem> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'Rp. ${_saldo}',
+                    'Rp. ${widget.transaction.amount}',
                     style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFFFA6D6D),

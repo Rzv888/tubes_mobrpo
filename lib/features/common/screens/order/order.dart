@@ -137,12 +137,14 @@ class _OrderScreenState extends State<OrderScreen> {
                             onTap: () {
                               _showOrderDetails(order);
                             },
-                            leading: Image.network(
-                              product['image'],
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                            ),
+                            leading:
+                                // ? Image.network(
+                                //     product['image'],
+                                //     width: 50,
+                                //     height: 50,
+                                //     fit: BoxFit.cover,
+                                //   )
+                                Icon(Icons.water),
                             title: Text('${product['nama_barang']}'),
                             subtitle: Text(
                                 'Total: ${order['total_transaksi']} \nAlamat: ${user['alamat']}'),

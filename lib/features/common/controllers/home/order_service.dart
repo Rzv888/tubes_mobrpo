@@ -30,6 +30,8 @@ class OrderService {
         'total_transaksi': totalTransaksi,
         'created_at': waktuPemesanan.toIso8601String()
       });
+      UserService().updateSaldo(-1 * totalTransaksi);
+      UserService().updateXP(10 * jumlahBarang); // nambah xp
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.green,
