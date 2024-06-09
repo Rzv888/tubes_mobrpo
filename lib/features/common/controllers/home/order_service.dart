@@ -22,20 +22,28 @@ class OrderService {
       int totalTransaksi, DateTime waktuPemesanan, BuildContext context) async {
     try {
       final user = await UserService().getCurrentUser();
-      await supabase.from('orders').insert({
-        'id_barang': productId,
-        'id_pemesan': user['id'],
-        'jumlah_barang': jumlahBarang,
-        'status': 'Dalam Proses',
-        'total_transaksi': totalTransaksi,
-        'created_at': waktuPemesanan.toIso8601String()
-      });
-      UserService().updateSaldo(-1 * totalTransaksi);
-      UserService().updateXP(10 * jumlahBarang); // nambah xp
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.green,
-          content: Text('Berhasil membuat order')));
+
+      if (user['saldo'] >= totalTransaksi * jumlahBarang) {
+        await supabase.from('orders').insert({
+          'id_barang': productId,
+          'id_pemesan': user['id'],
+          'jumlah_barang': jumlahBarang,
+          'status': 'Dalam Proses',
+          'total_transaksi': jumlahBarang * totalTransaksi,
+          'created_at': waktuPemesanan.toIso8601String()
+        });
+        UserService().updateSaldo(-1 * (jumlahBarang * totalTransaksi));
+        UserService().updateXP(10 * jumlahBarang); // nambah xp
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Berhasil membuat order')));
+      } else {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Order gagal, saldo anda tidak mencukupi')));
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.redAccent, content: Text(e.toString())));
