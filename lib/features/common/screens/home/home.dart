@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               backgroundColor: Colors.grey[200],
                               backgroundImage: _image != null
                                   ? FileImage(_image!)
-                                  : AssetImage("") as ImageProvider,
+                                  : AssetImage("assets/img/profile.png") as ImageProvider,
                             ),
                           ),
                           const SizedBox(
