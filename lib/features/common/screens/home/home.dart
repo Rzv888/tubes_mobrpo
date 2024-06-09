@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _level = user['level'];
       _saldo = user['saldo'];
       print(_saldo.toString() + "saldo: ");
-      // setState(() {});
+      setState(() {});
       return user;
     } catch (e) {
       print(e);
@@ -83,9 +83,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: FutureBuilder(
           future: refreshDataUser(context),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
+            // if (snapshot.connectionState == ConnectionState.waiting) {
+            //   return Center(child: CircularProgressIndicator());
+            // }
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: ListView(
