@@ -3,6 +3,7 @@ import 'package:flutter_tubes_galon/features/authentication/controllers/auth_ser
 import 'package:flutter_tubes_galon/features/authentication/controllers/user_service.dart';
 import 'package:flutter_tubes_galon/features/authentication/screens/login/login.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
@@ -28,18 +29,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  Future<void> refreshDataUser(context) async {
-    final user = await UserService().getCurrentUser();
-    print(("cek" + user.toString()));
-    _namalengkap = user["nama_lengkap"];
-    _address = user['alamat'];
-    _phoneNumber = user['no_wa'];
-    _email = user['email'];
-
-    setState(() {});
+  @override
+  void initState() {
+    super.initState();
+    refreshDataUser();
+    _loadImage();
   }
 
-  Future<void> _showPicker(context) async {
+  Future<void> refreshDataUser() async {
+    try {
+      final user = await UserService().getCurrentUser();
+      if (user != null) {
+        setState(() {
+          _namalengkap = user['nama_lengkap'] as String? ?? '';
+          _address = user['alamat'] as String? ?? '';
+          _phoneNumber = user['no_wa'] as String? ?? '';
+          _email = user['email'] as String? ?? '';
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> _loadImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imagePath = prefs.getString('profile_image_path');
+    if (imagePath != null) {
+      setState(() {
+        _image = File(imagePath);
+      });
+    }
+  }
+
+  Future<void> _saveImage(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('profile_image_path', path);
+  }
+
+  Future<void> _showPicker(BuildContext context) async {
     double screenHeight = MediaQuery.of(context).size.height;
     double sheetHeight = screenHeight * 0.5;
 
@@ -87,6 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _image = File(image.path);
       });
+      _saveImage(image.path);
     }
   }
 
@@ -100,24 +129,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _image = File(image.path);
       });
+      _saveImage(image.path);
     }
   }
 
-  void _editUsername() {
-    _namalengkapController.text = _namalengkap;
+  void _editField(String field) {
+    TextEditingController controller;
+    String currentValue;
+    String hintText;
+
+    switch (field) {
+      case 'Username':
+        controller = _namalengkapController;
+        currentValue = _namalengkap;
+        hintText = "Enter new username";
+        break;
+      case 'Email':
+        controller = _emailController;
+        currentValue = _email;
+        hintText = "Enter new email";
+        break;
+      case 'Password':
+        controller = _passwordController;
+        currentValue = _password;
+        hintText = "Enter new password";
+        break;
+      case 'Phone Number':
+        controller = _phoneNumberController;
+        currentValue = _phoneNumber;
+        hintText = "Enter new phone number";
+        break;
+      case 'Address':
+        controller = _addressController;
+        currentValue = _address;
+        hintText = "Enter new address";
+        break;
+      default:
+        return;
+    }
+
+    controller.text = currentValue;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit Username'),
+          title: Text('Edit $field'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextField(
-                  controller: _namalengkapController,
-                  decoration: const InputDecoration(hintText: "Enter new username"),
+                  controller: controller,
+                  obscureText: field == 'Password',
+                  decoration: InputDecoration(hintText: hintText),
                 ),
               ],
             ),
@@ -133,7 +198,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: const Text('SAVE'),
               onPressed: () {
                 setState(() {
-                  _namalengkap = _namalengkapController.text;
+                  switch (field) {
+                    case 'Username':
+                      _namalengkap = controller.text;
+                      AuthService().editName(context, _namalengkap);
+                      break;
+                    case 'Email':
+                      _email = controller.text;
+                      AuthService().editEmail(context, _email);
+                      break;
+                    case 'Password':
+                      _password = controller.text;
+                      AuthService().editPassword(context, _password);
+                      break;
+                    case 'Phone Number':
+                      _phoneNumber = controller.text;
+                      AuthService().editWa(context, _phoneNumber);
+                      break;
+                    case 'Address':
+                      _address = controller.text;
+                      AuthService().editAlamat(context, _address);
+                      break;
+                  }
                 });
                 Navigator.of(context).pop();
               },
@@ -144,78 +230,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _editProfile() {
-    _passwordController.text = _password;
-    _addressController.text = _address;
-    _phoneNumberController.text = _phoneNumber;
-    _emailController.text = _email;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Profile'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(hintText: "Enter new email"),
-                ),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(hintText: "Enter new password"),
-                ),
-                TextField(
-                  controller: _phoneNumberController,
-                  decoration: const InputDecoration(hintText: "Enter new phone number"),
-                ),
-                TextField(
-                  controller: _addressController,
-                  decoration: const InputDecoration(hintText: "Enter new address"),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                setState(() {
-                  _password = _passwordController.text;
-                  _address = _addressController.text;
-                  _phoneNumber = _phoneNumberController.text;
-                  _email = _emailController.text;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _logout() {
-    // Handle logout functionality
-    AuthService().logout(
-        context); // For example, you can navigate to the login screen or clear user session
+  void _logout() async {
+    await AuthService().logout(context);
     Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    refreshDataUser(context);
   }
 
   @override
@@ -224,140 +242,139 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: const Text('Profile Page'),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      body: SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  _showPicker(context);
-                },
-                child: CircleAvatar(
-                  radius: 55,
-                  backgroundColor: Colors.grey[200],
-                  child: _image != null
-                      ? ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: Image.file(
-                      _image!,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                      : Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    width: 100,
-                    height: 100,
-                    child: const Icon(
-                      Icons.camera_alt,
-                      color: Colors.grey,
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: <Widget>[
+                GestureDetector(
+                  onTap: () {
+                    _showPicker(context);
+                  },
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.grey[200],
+                    child: _image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.file(
+                              _image!,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            width: 100,
+                            height: 100,
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.grey,
+                            ),
+                          ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _namalengkap,
-                    style: const TextStyle(                  
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    )
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue),
-                    onPressed: _editUsername,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _namalengkap,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () => _editField('Username'),
+                    ),
+                  ],
                 ),
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'User Information',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ListTile(
-                        leading: const Icon(Icons.email, color: Colors.grey),
-                        title: Text(_email),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.lock, color: Colors.grey),
-                        title: const Text('*********'),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.phone, color: Colors.grey),
-                        title: Text(_phoneNumber),
-                      ),
-                      ListTile(
-                        leading:
-                            const Icon(Icons.location_on, color: Colors.grey),
-                        title: Text(_address),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: _editProfile,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                const SizedBox(height: 30),
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'User Information',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: const Text('Edit Profile',
-                            style: TextStyle(fontSize: 16)),
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        ListTile(
+                          leading: const Icon(Icons.email, color: Colors.grey),
+                          title: Text(_email),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.lock, color: Colors.grey),
+                          title: const Text('*********'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _editField('Password'),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.phone, color: Colors.grey),
+                          title: Text(_phoneNumber),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _editField('Phone Number'),
+                          ),
+                        ),
+                        ListTile(
+                          leading:
+                              const Icon(Icons.location_on, color: Colors.grey),
+                          title: Text(_address),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _editField('Address'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: _logout,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
+                  child: const Text('Logout', style: TextStyle(fontSize: 16)),
                 ),
-                child: const Text('Logout', style: TextStyle(fontSize: 16)),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-

@@ -39,16 +39,47 @@ class UserService {
   }
 
   Future<dynamic> getCurrentUser() async {
-    final email = await AuthService().getUserEmail();
-    final user = await supabase.from("users").select().match({'email': email});
-    print("nama" + user[0]["nama_lengkap"]);
-    return user[0];
+    try {
+      final email = await AuthService().getUserEmail();
+      final user =
+          await supabase.from("users").select().match({'email': email});
+      print("nama" + user[0]["nama_lengkap"]);
+      return user[0];
+    } catch (e) {
+      print(e);
+      return e.toString();
+    }
   }
 
   Future<void> updateSaldo(int saldo) async {
     final user = await UserService().getCurrentUser();
     int curSaldo = user["saldo"] + saldo;
-    await supabase.from("users").update({'saldo': curSaldo}).match({"email":user["email"]});
-    
+    await supabase
+        .from("users")
+        .update({'saldo': curSaldo}).match({"email": user["email"]});
+  }
+
+  Future<void> updateXP(int XP) async {
+    final user = await UserService().getCurrentUser();
+    int curXP = user["xp"] + XP;
+    await supabase
+        .from("users")
+        .update({'xp': curXP}).match({"email": user["email"]});
+  }
+
+  Future<void> setXP(int XP) async {
+    final user = await UserService().getCurrentUser();
+
+    await supabase
+        .from("users")
+        .update({'xp': XP}).match({"email": user["email"]});
+  }
+
+  Future<void> addLevel() async {
+    final user = await UserService().getCurrentUser();
+    int curlevel = user["level"] + 1;
+    await supabase
+        .from("users")
+        .update({'level': curlevel}).match({"email": user["email"]});
   }
 }

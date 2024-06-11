@@ -26,9 +26,9 @@ class _SaldoScreenState extends State<SaldoScreen> {
   Future<void> refreshDataUser(context) async {
     final user = await UserService().getCurrentUser();
     print(("cek" + user.toString()));
-    _saldo = user['saldo'];
-
-    setState(() {});
+    setState(() {
+      _saldo = user['saldo'];
+    });
   }
 
   @override
@@ -41,124 +41,132 @@ class _SaldoScreenState extends State<SaldoScreen> {
   Widget build(BuildContext context) {
     final isDark = AppHelperFunctions.isDarkMode(context);
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [AppColors.dark, AppColors.grey]
-                : [
-                    AppColors.primary,
-                    AppColors.secondary,
-                  ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await refreshDataUser(context);
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [AppColors.dark, AppColors.grey]
+                  : [
+                      AppColors.primary,
+                      AppColors.secondary,
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: AppSpacingStyle.paddingWithAppBarHeight,
-              child: InkWell(
-                  onTap: () => Get.back(),
-                  child: const Icon(
-                    Iconsax.arrow_left_2,
-                    color: AppColors.grey,
-                  )),
-            ),
-            Container(
-              alignment: Alignment.center,
-              child: Column(
-                children: [
-                  Text(
-                    'Saldo Anda',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Text(
-                      'Rp. ${_saldo}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: AppSpacingStyle.paddingWithAppBarHeight,
+                child: InkWell(
+                    onTap: () => Get.back(),
+                    child: const Icon(
+                      Iconsax.arrow_left_2,
+                      color: AppColors.grey,
+                    )),
               ),
-            ),
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(top: 50),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.dark : AppColors.primaryBackground,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(45),
-                  ),
-                ),
+              Container(
+                alignment: Alignment.center,
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 30,
-                        horizontal: 25,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Isi Saldo',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color:
-                                    isDark ? AppColors.grey : AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (BuildContext ctx) {
-                                  return const DetailTransactionScreen();
-                                },
-                              );
-                            },
-                            child: Text(
-                              'Lihat Semua',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color:
-                                    isDark ? AppColors.grey : AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'Saldo Anda',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemBuilder: (context, index) {
-                          return TransactionItem(
-                            transaction: transactions[index],
-                          );
-                        },
-                        itemCount: transactions.length,
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        'Rp. ${_saldo}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 50),
+                  decoration: BoxDecoration(
+                    color:
+                        isDark ? AppColors.dark : AppColors.primaryBackground,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(45),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 30,
+                          horizontal: 25,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Isi Saldo',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: isDark
+                                      ? AppColors.grey
+                                      : AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (BuildContext ctx) {
+                                    return const DetailTransactionScreen();
+                                  },
+                                );
+                              },
+                              child: Text(
+                                'Lihat Semua',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDark
+                                      ? AppColors.grey
+                                      : AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            return TransactionItem(
+                              transaction: transactions[index],
+                            );
+                          },
+                          itemCount: transactions.length,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
